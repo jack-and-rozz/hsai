@@ -1,0 +1,16 @@
+checkpoints
+tmp
+tensorflow
+*.pyc
+dataset/*
+.#*
+.fuse*
+*/.#*
+*/.fuse*
+.nfs*
+configs/config
+nohup.out
+tmp*
+.DS_Store
+.python-version
+ref
