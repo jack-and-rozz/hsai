@@ -14,3 +14,4 @@ tmp*
 .DS_Store
 .python-version
 ref
+trained_models/*

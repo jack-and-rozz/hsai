@@ -2,21 +2,23 @@
 import sys, os, random, copy, socket, time, re, argparse
 from collections import OrderedDict
 from pprint import pprint
+import core.models
 import tensorflow as tf
 import numpy as np
 
 from core.utils import common, tf_utils
-import core.manager import ManagerBase
+from core.manager import ManagerBase
 
 class ExperimentManager(ManagerBase):
   def __init__(self, args, sess):
     super().__init__(args, sess)
+    self.model = None
 
   @common.timewatch()
   def create_model(self, config, checkpoint_path=None):
-    mtl_model_type = getattr(mtl_model, config.model_type)
+    model_type = getattr(core.models, config.model_type)
     if not self.model:
-      self.model = m = mtl_model_type(self.sess, config, self.vocab) # Define computation graph
+      self.model = model_type(self.sess, config) # Define computation graph
 
     if not checkpoint_path or not os.path.exists(checkpoint_path + '.index'):
       ckpt = tf.train.get_checkpoint_state(self.checkpoints_path)
@@ -61,7 +63,7 @@ if __name__ == "__main__":
   parser.add_argument('mode', type=str, help ='')
   parser.add_argument('-ct','--config_type', default='main', 
                       type=str, help ='')
-  parser.add_argument('-cp','--config_path', default='configs/experiments.conf',
+  parser.add_argument('-cp','--config_path', default='experiments.conf',
                       type=str, help ='')
   parser.add_argument('--cleanup', default=False,
                       type=common.str2bool, help ='')

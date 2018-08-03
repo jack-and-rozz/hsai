@@ -1,1 +1,2 @@
-from boc import BagOfCards
+from core.models.base import ModelBase
+from core.models.boc import BagOfCards

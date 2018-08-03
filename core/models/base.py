@@ -67,3 +67,4 @@ class ModelBase(object):
       updates = opt.apply_gradients(
         grad_and_vars, global_step=global_step)
     return updates
+

@@ -25,10 +25,17 @@ def shape(x, dim):
   return x.get_shape()[dim].value or tf.shape(x)[dim]
 
 def batch_gather(emb, indices):
-  # Indices of rank-1 tensor is regarded as batch respective specifications.
+  '''
+  e.g. arr = [[[0, 1], [2, 3]], [[4, 5], [6, 7]]]  # arr.shape = [2,2,2]
+       indices = [[0], [1]]
+       res = [[[0, 1], [6, 7]]]
+
+       indices = [[0, 0], [0, 1]]
+       res = [[[0, 1], [0, 1]], [[4, 5], [6, 7]]]
+  '''
+  # When the rank of emb is N, indices of rank N-1 tensor is regarded as batch respective specifications.
   if len(indices.get_shape()) == 1:
     indices = tf.expand_dims(indices, 1)
- 
   batch_size = shape(emb, 0)
   seqlen = shape(emb, 1)
   if len(emb.get_shape()) > 2:
@@ -40,8 +47,7 @@ def batch_gather(emb, indices):
   offset = tf.expand_dims(tf.range(batch_size) * seqlen, 1)  # [batch_size, 1]
 
   gathered = tf.gather(flattened_emb, indices + offset) # [batch_size, num_indices, emb]
-  #if len(emb.get_shape()) == 2:
-  #  gathered = tf.squeeze(gathered, 2) # [batch_size, num_indices]
+
   return gathered
 
 def linear(inputs, output_size=None,
@@ -56,8 +62,6 @@ def linear(inputs, output_size=None,
   with tf.variable_scope(scope or "linear"):
     inputs_rank = len(inputs.get_shape().as_list())
     hidden_size = shape(inputs, -1)
-    dbgprint(hidden_size)
-    dbgprint(output_size)
     w = tf.get_variable('weights', [hidden_size, output_size])
     b = tf.get_variable('biases', [output_size])
     if inputs_rank == 3:

@@ -1,0 +1,12 @@
+jupyter
+sklearn
+orderedset
+pyhocon
+matplotlib
+mojimoji
+nltk
+numpy
+pandas
+scipy
+seaborn
+tensorflow
