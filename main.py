@@ -35,12 +35,33 @@ class ExperimentManager(ManagerBase):
       sys.stdout.write("Created model with fresh parameters.\n")
       tf.global_variables_initializer().run()
 
+    variables_path = self.root_path + '/variables.list'
+    with open(variables_path, 'w') as f:
+      variable_names = sorted([v.name + ' ' + str(v.get_shape()) for v in tf.global_variables()])
+      f.write('\n'.join(variable_names) + '\n')
+
   def output_variables_as_text(self):
-    pass
+    if not self.model:
+      return None
+    epoch = self.model.epoch.eval()
+    variables_dir = self.variables_path + '/%02d' % epoch
+    if not os.path.exists(variables_dir):
+      os.makedirs(variables_dir)
+    for v in tf.global_variables():
+      name = v.name
+      if re.search('Adam', name):
+        continue
+
+      if re.search('Inference', name):
+        name = v.name.replace('/', '-').replace(':0', '') + '.csv'
+        variables_path = os.path.join(variables_dir, name)
+        np.savetxt(variables_path, v.eval())
 
   def train(self):
     model = self.create_model(self.config)
-
+    self.output_variables_as_text()
+    return
+    
 def main(args):
   tf_config = tf.ConfigProto(
     log_device_placement=False, # 各デバイスへの演算配置の表示

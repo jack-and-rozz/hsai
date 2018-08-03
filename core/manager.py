@@ -16,6 +16,7 @@ def get_logger(logfile_path=None):
 class ManagerBase(object):
   def __init__(self, args, sess):
     self.root_path = args.model_root_path
+    self.variables_path = args.model_root_path +'/variables'
     self.checkpoints_path = args.model_root_path +'/checkpoints'
     self.tests_path = args.model_root_path + '/tests'
     self.summaries_path = args.model_root_path + '/summaries'
@@ -53,5 +54,7 @@ class ManagerBase(object):
       os.makedirs(self.tests_path)
     if not os.path.exists(self.summaries_path):
       os.makedirs(self.summaries_path)
+    if not os.path.exists(self.variables_path):
+      os.makedirs(self.variables_path)
 
 
