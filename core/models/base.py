@@ -60,11 +60,14 @@ class ModelBase(object):
 
       params = tf.contrib.framework.get_trainable_variables()
       opt = getattr(tf.train, self.optimizer_type)(learning_rate)
-      gradients = [grad for grad, _ in opt.compute_gradients(loss)]
-      clipped_gradients, _ = tf.clip_by_global_norm(gradients, 
-                                                    self.max_gradient_norm)
-      grad_and_vars = [(g, v) for g, v in zip(clipped_gradients, params)]
-      updates = opt.apply_gradients(
-        grad_and_vars, global_step=global_step)
-    return updates
+      if self.max_gradient_norm:
+        gradients = [grad for grad, _ in opt.compute_gradients(loss)]
+        clipped_gradients, _ = tf.clip_by_global_norm(gradients, 
+                                                      self.max_gradient_norm)
+        grad_and_vars = [(g, v) for g, v in zip(clipped_gradients, params)]
+        updates = opt.apply_gradients(
+          grad_and_vars, global_step=global_step)
+        return updates
+      else:
+        return opt.minimize(loss)
 
