@@ -2,6 +2,7 @@
 import sys, os, random, copy, socket, time, re, argparse
 from collections import OrderedDict
 from pprint import pprint
+from core.dataset import HSReplayDataset
 import core.models
 import tensorflow as tf
 import numpy as np
@@ -13,6 +14,7 @@ class ExperimentManager(ManagerBase):
   def __init__(self, args, sess):
     super().__init__(args, sess)
     self.model = None
+    self.dataset = HSReplayDataset
 
   @common.timewatch()
   def create_model(self, config, checkpoint_path=None):
@@ -39,11 +41,10 @@ class ExperimentManager(ManagerBase):
     with open(variables_path, 'w') as f:
       variable_names = sorted([v.name + ' ' + str(v.get_shape()) for v in tf.global_variables()])
       f.write('\n'.join(variable_names) + '\n')
+    return self.model
 
-  def output_variables_as_text(self):
-    if not self.model:
-      return None
-    epoch = self.model.epoch.eval()
+  def output_variables_as_text(self, model):
+    epoch = model.epoch.eval()
     variables_dir = self.variables_path + '/%02d' % epoch
     if not os.path.exists(variables_dir):
       os.makedirs(variables_dir)
@@ -57,11 +58,35 @@ class ExperimentManager(ManagerBase):
         variables_path = os.path.join(variables_dir, name)
         np.savetxt(variables_path, v.eval())
 
+  def save_model(self, model, save_as_best=False):
+    checkpoint_path = self.checkpoints_path + '/model.ckpt'
+    self.saver.save(self.sess, checkpoint_path, global_step=model.epoch)
+    if save_as_best:
+      suffixes = ['data-00000-of-00001', 'index', 'meta']
+      for sfx in suffixes:
+        source_path = self.checkpoints_path + "/model.ckpt-%d.%s" % (model.epoch.eval(), sfx)
+        target_path = self.checkpoints_path + "/%s.%s" % (BEST_CHECKPOINT_NAME, sfx)
+        if os.path.exists(source_path):
+          cmd = "cp %s %s" % (source_path, target_path)
+          os.system(cmd)
   def train(self):
     model = self.create_model(self.config)
-    self.output_variables_as_text()
-    return
-    
+    self.output_variables_as_text(model)
+    exit(1)
+    for epoch in range(m.epoch.eval(), self.config.max_epoch):
+      batches = self.dataset.get_batches(
+        self.config.batch_size, self.config.iterations_per_epoch,
+        is_training=True)
+
+      average_loss = 0.0
+      for i, batch in enumerate(batches):
+        q_values, loss, _ =  model.train(batch)
+        average_loss += loss
+        print('step = %d, loss = %f' % (i, loss))
+      average_loss /= (i+1)
+      self.logger.info('Epoch %d, Average loss = %f' % (epoch, average_loss))
+      self.save_model(model)
+
 def main(args):
   tf_config = tf.ConfigProto(
     log_device_placement=False, # 各デバイスへの演算配置の表示
