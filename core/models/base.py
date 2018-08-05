@@ -27,10 +27,14 @@ class ModelBase(object):
     self.max_gradient_norm = config.optimizer.max_gradient_norm
 
     # Define operations in advance not to create ops in the loop.
-    self._add_step = tf.assign(self.global_step, tf.add(self.global_step, tf.constant(1, dtype=tf.int32)))
-    self._add_epoch = tf.assign(self.epoch, tf.add(self.epoch, tf.constant(1, dtype=tf.int32)))
-    self._next_score = tf.placeholder(tf.float32, name='max_score_ph', shape=[])
-    self._update_max_score = tf.assign(self.max_score, self._next_score)
+    with tf.name_scope('add_step'):
+      self._add_step = tf.assign(self.global_step, tf.add(self.global_step, tf.constant(1, dtype=tf.int32)))
+    with tf.name_scope('add_epoch'):
+      self._add_epoch = tf.assign(self.epoch, tf.add(self.epoch, tf.constant(1, dtype=tf.int32)))
+
+    with tf.name_scope('update_max_score'):
+      self._next_score = tf.placeholder(tf.float32, name='max_score_ph', shape=[])
+      self._update_max_score = tf.assign(self.max_score, self._next_score)
 
   def initialize_embeddings(self, name, emb_shape, initializer=None, 
                             trainable=True):

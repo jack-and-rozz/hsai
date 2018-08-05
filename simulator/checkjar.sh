@@ -16,8 +16,8 @@ usage() {
 if [ $# -lt 1 ];then
     usage;
 fi
-if [ ! -e $model_log_path  ]; then
-   mkdir -p $model_log_path
+if [ ! -e $model_replay_path  ]; then
+   mkdir -p $model_replay_path
 fi
 
 

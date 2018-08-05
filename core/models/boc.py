@@ -18,32 +18,43 @@ class BagOfCards(ModelBase):
     with tf.name_scope('Placeholders'):
       self.ph = dotDict()
       self.ph.is_training = tf.placeholder(tf.bool, name='is_training', shape=[])
+      self.ph.state = tf.placeholder(tf.float32, name='ph.state',
+                                     shape=[None, config.vocab_size.card])
+      self.ph.action = tf.placeholder(tf.int32, name='ph.action',
+                                      shape=[None])
+      self.ph.reward = tf.placeholder(tf.float32, name='ph.reward', shape=[None])
+      self.ph.is_end_state = tf.placeholder(tf.bool, name='ph.is_end_state', 
+                                            shape=[None])
 
-      self.ph.state = tf.placeholder(tf.float32, 
-                                     [None, config.vocab_size.card])
-      self.ph.action = tf.placeholder(tf.int32, [None])
-      self.ph.reward = tf.placeholder(tf.float32, [None])
-      self.ph.is_end_state = tf.placeholder(tf.bool, shape=[None])
 
-    self.keep_prob = 1.0 - tf.to_float(self.ph.is_training) * config.dropout_rate
+    with tf.name_scope('keep_prob'):
+      self.keep_prob = 1.0 - tf.to_float(self.ph.is_training) * config.dropout_rate
+
     self.q_values = self.inference(self.ph.state) # [batch_size, vocab_size] 
 
     # The Q values only of the action chosen in the current step.
-    batch_size = shape(self.ph.state, 0)
-    filtered_q_values = tf.reshape(
-      batch_gather(self.q_values, self.ph.action), [batch_size]) 
+    
+    with tf.name_scope('dynamic_batch_size'):
+      batch_size = shape(self.ph.state, 0)
 
-    next_state = self.ph.state + tf.one_hot(self.ph.action, config.vocab_size.card)
-    next_q_values = self.inference(next_state) # [batch_size, vocab_size]
-    next_q_value_mask = tf.cast(tf.logical_not(self.ph.is_end_state), tf.float32) # [batch_soize]
+    with tf.name_scope('filtered_q_values'):
+      filtered_q_values = tf.reshape(
+        batch_gather(self.q_values, self.ph.action), [batch_size]) 
+
+    with tf.name_scope('next_state'):
+      next_state = self.ph.state + tf.one_hot(self.ph.action, config.vocab_size.card)
+    with tf.name_scope('next_q_values'):
+      next_q_values = self.inference(next_state) # [batch_size, vocab_size]
+      next_q_value_mask = tf.cast(tf.logical_not(self.ph.is_end_state), tf.float32) # [batch_soize]
 
     # Target is the sum of and the intermediate reward and the next Q values discounted by gamma if the next state is not an end state. 
-    target = self.ph.reward + self.gamma * next_q_value_mask * tf.reduce_max(next_q_values, axis=1) # r + gamma * max(Q(s[t+1], a[t+1])) if t+1 != T else r
-
-    target = tf.stop_gradient(target)
+    with tf.name_scope('target_value'):
+      target = self.ph.reward + self.gamma * next_q_value_mask * tf.reduce_max(next_q_values, axis=1) # r + gamma * max(Q(s[t+1], a[t+1])) if t+1 != T else r
+      target = tf.stop_gradient(target)
 
     #self.loss = self._loss(target, filtered_q_values)
-    self.loss = self._clipped_loss(target, filtered_q_values)
+    with tf.name_scope('loss'):
+      self.loss = self._clipped_loss(target, filtered_q_values)
     self.updates = self.get_updates(self.loss, self.global_step)
 
   def _clipped_loss(self, target, filtered_qs):

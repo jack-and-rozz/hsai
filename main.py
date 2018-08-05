@@ -14,7 +14,7 @@ class ExperimentManager(ManagerBase):
   def __init__(self, args, sess):
     super().__init__(args, sess)
     self.model = None
-    self.dataset = HSReplayDataset(config.dataset)
+    self.dataset = HSReplayDataset(self.replays_path, self.config.dataset)
 
   @common.timewatch()
   def create_model(self, config, checkpoint_path=None):
@@ -45,7 +45,7 @@ class ExperimentManager(ManagerBase):
 
   def output_variables_as_text(self, model):
     epoch = model.epoch.eval()
-    variables_dir = self.variables_path + '/%02d' % epoch
+    variables_dir = self.variables_path + '/%03d' % epoch
     if not os.path.exists(variables_dir):
       os.makedirs(variables_dir)
     for v in tf.global_variables():
@@ -78,15 +78,13 @@ class ExperimentManager(ManagerBase):
 
       self.save_model(model)
       self.output_variables_as_text(model)
-      self.test(model)
-      exit(1)
+
       batches = self.dataset.get_batches(
-        self.config.batch_size, self.config.iterations_per_epoch,
-        model.epoch.eval(), is_training=True)
+        self.config.batch_size, model.epoch.eval(), is_training=True)
 
       average_loss = 0.0
       for i, batch in enumerate(batches):
-        q_values, loss, _ =  model.train(batch)
+        q_values, loss, _ =  model.step(batch)
         average_loss += loss
         print('step = %d, loss = %f' % (i, loss))
       average_loss /= (i+1)

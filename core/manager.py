@@ -20,6 +20,7 @@ class ManagerBase(object):
     self.checkpoints_path = args.model_root_path +'/checkpoints'
     self.tests_path = args.model_root_path + '/tests'
     self.summaries_path = args.model_root_path + '/summaries'
+    self.replays_path = args.model_root_path + '/replays'
     self.sess = sess
     self.create_dir(args)
     self.logger = get_logger(logfile_path=os.path.join(args.model_root_path, 
@@ -56,5 +57,7 @@ class ManagerBase(object):
       os.makedirs(self.summaries_path)
     if not os.path.exists(self.variables_path):
       os.makedirs(self.variables_path)
+    if not os.path.exists(self.replays_path):
+      os.makedirs(self.replays_path)
 
 
