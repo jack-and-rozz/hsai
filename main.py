@@ -74,7 +74,7 @@ class ExperimentManager(ManagerBase):
     model = self.create_model(self.config)
     
     for epoch in range(model.epoch.eval(), self.config.max_epoch):
-      sys.stdout.write('Save the model at the begining of epoch %02d as oodel.ckpt-%d\n' % (epoch, epoch))
+      sys.stdout.write('Save the model at the begining of epoch %02d as model.ckpt-%d\n' % (epoch, epoch))
 
       self.save_model(model)
       self.output_variables_as_text(model)
@@ -118,7 +118,6 @@ def main(args):
 
 if __name__ == "__main__":
   '''
-  checkpoint-epoch i = 
   '''
   desc = "Based on https://github.com/yuishihara/DQN-tensorflow/tree/dqn_nature_ver"
   parser = argparse.ArgumentParser(description=desc)

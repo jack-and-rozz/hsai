@@ -8,29 +8,36 @@ from core.models import ModelBase
 class BagOfCards(ModelBase):
   def __init__(self, sess, config):
     super().__init__(sess, config)
-    self.activation_f = tf.nn.relu
+    self.activation_f = getattr(tf.nn, config.activation)
+    #self.activation_f = tf.nn.sigmoid
     self.hidden_size = config.hidden_size
     self.num_ff_layers = config.num_ff_layers
     self.vocab_size = config.vocab_size
+    self.max_num_card = config.max_num_card
     self.gamma = config.gamma
 
     # Define placeholders.
     with tf.name_scope('Placeholders'):
       self.ph = dotDict()
       self.ph.is_training = tf.placeholder(tf.bool, name='is_training', shape=[])
-      self.ph.state = tf.placeholder(tf.float32, name='ph.state',
-                                     shape=[None, config.vocab_size.card])
-      self.ph.action = tf.placeholder(tf.int32, name='ph.action',
-                                      shape=[None])
+      self.ph.state = tf.placeholder(
+        tf.float32, name='ph.state',
+        shape=[None, config.vocab_size.card * (config.max_num_card+1)])
+      self.ph.next_state = tf.placeholder(
+        tf.float32, name='ph.next_state',
+        shape=[None, config.vocab_size.card * (config.max_num_card+1)])
+
+      self.ph.action = tf.placeholder(tf.int32, name='ph.action', shape=[None])
       self.ph.reward = tf.placeholder(tf.float32, name='ph.reward', shape=[None])
-      self.ph.is_end_state = tf.placeholder(tf.bool, name='ph.is_end_state', 
-                                            shape=[None])
+      self.ph.is_end_state = tf.placeholder(
+        tf.bool, name='ph.is_end_state', shape=[None])
 
     with tf.name_scope('keep_prob'):
       self.keep_prob = 1.0 - tf.to_float(self.ph.is_training) * config.dropout_rate
 
     self.q_values = self.inference(self.ph.state) # [batch_size, vocab_size] 
-
+    self.q_values = tf.clip_by_value(self.q_values, 0.0, 1.0)
+    
     # The Q values only of the action chosen in the current step.
     with tf.name_scope('dynamic_batch_size'):
       batch_size = shape(self.ph.state, 0)
@@ -40,7 +47,8 @@ class BagOfCards(ModelBase):
         batch_gather(self.q_values, self.ph.action), [batch_size]) 
 
     with tf.name_scope('next_state'):
-      next_state = self.ph.state + tf.one_hot(self.ph.action, config.vocab_size.card)
+      next_state = self.ph.next_state
+      #next_state = self.ph.state + tf.one_hot(self.ph.action, config.vocab_size.card)
     with tf.name_scope('next_q_values'):
       next_q_values = self.inference(next_state) # [batch_size, vocab_size]
       next_q_value_mask = tf.cast(tf.logical_not(self.ph.is_end_state), tf.float32) # [batch_size]
@@ -69,11 +77,12 @@ class BagOfCards(ModelBase):
     input_feed = {}
     input_feed[self.ph.state] = batch.state
     input_feed[self.ph.is_training] = batch.is_training
+    if batch.next_state:
+      input_feed[self.ph.next_state] = batch.next_state
 
     if batch.reward  and batch.is_end_state:
       input_feed[self.ph.reward] = batch.reward
       input_feed[self.ph.is_end_state] = batch.is_end_state
-
     if batch.action:
       input_feed[self.ph.action] = batch.action
     return input_feed
@@ -88,20 +97,22 @@ class BagOfCards(ModelBase):
           x = tf.nn.dropout(x, keep_prob=self.keep_prob)
       with tf.variable_scope('Output') as scope:
         q_values = linear(x, output_size=self.vocab_size.card,
-                          activation=tf.nn.relu, scope=scope)
+                          activation=self.activation_f, scope=scope)
     return q_values
   
   def step(self, batch, step):
     input_feed = self.get_input_feed(batch)
 
-    self.debug_ops = [self.q_values, self.filtered_q_values, self.target]
-
-    if step > 100:
+    #self.debug_ops = [self.q_values, self.filtered_q_values, self.target]
+    self.debug_ops = []
+    if True or step > 0 and self.debug_ops:
       for k, v in zip(self.debug_ops, self.sess.run(self.debug_ops, input_feed)):
         print ('Step %d' % step)
         print(k)
         print(v)
-      print ()
+        #print ()
+    #if step == 50:
+    #  exit(1)
 
     output_feed = [self.q_values]
     if batch.is_training:
