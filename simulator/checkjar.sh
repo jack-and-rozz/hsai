@@ -23,10 +23,7 @@ fi
 
 while true 
 do
-    #echo "java -jar $jar_path $exe_path1 $exe_path2 $model_dir $model_replay_path"
-    java -jar $jar_path $exe_path1 $exe_path2 $model_dir $model_replay_path &
-    java -jar $jar_path $exe_path1 $exe_path2 $model_dir $model_replay_path &
-    java -jar $jar_path $exe_path1 $exe_path2 $model_dir $model_replay_path &
-    java -jar $jar_path $exe_path1 $exe_path2 $model_dir $model_replay_path &
+    echo "java -jar $jar_path $exe_path1 $exe_path2 $model_dir $model_replay_path"
+    java -jar $jar_path $exe_path1 $exe_path2 $model_dir $model_replay_path
     wait
 done
