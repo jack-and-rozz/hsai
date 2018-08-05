@@ -69,11 +69,16 @@ class ExperimentManager(ManagerBase):
         if os.path.exists(source_path):
           cmd = "cp %s %s" % (source_path, target_path)
           os.system(cmd)
+
   def train(self):
     model = self.create_model(self.config)
-    self.output_variables_as_text(model)
-    exit(1)
-    for epoch in range(m.epoch.eval(), self.config.max_epoch):
+    for epoch in range(model.epoch.eval(), self.config.max_epoch):
+      sys.stdout.write('Save the model at the begining of epoch %02d as oodel.ckpt-%d\n' % (epoch, epoch))
+
+      self.save_model(model)
+      self.output_variables_as_text(model)
+      self.test(model)
+      exit(1)
       batches = self.dataset.get_batches(
         self.config.batch_size, self.config.iterations_per_epoch,
         is_training=True)
@@ -85,8 +90,18 @@ class ExperimentManager(ManagerBase):
         print('step = %d, loss = %f' % (i, loss))
       average_loss /= (i+1)
       self.logger.info('Epoch %d, Average loss = %f' % (epoch, average_loss))
-      self.save_model(model)
+      model.add_epoch()
 
+  def test(self, model):
+    if not model:
+      model = self.create_model(self.config)
+    batch = common.recDotDefaultDict()
+    state = [[1.0 for _ in range(160)]]
+    batch.state = state
+    batch.is_training = False
+    res = model.step(batch)
+    print (res)
+    
 def main(args):
   tf_config = tf.ConfigProto(
     log_device_placement=False, # 各デバイスへの演算配置の表示
@@ -103,7 +118,10 @@ def main(args):
 
 
 if __name__ == "__main__":
-  desc = ""
+  '''
+  checkpoint-epoch i = 
+  '''
+  desc = "Based on https://github.com/yuishihara/DQN-tensorflow/tree/dqn_nature_ver"
   parser = argparse.ArgumentParser(description=desc)
   parser.add_argument('model_root_path', type=str, help ='')
   parser.add_argument('mode', type=str, help ='')

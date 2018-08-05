@@ -1,5 +1,6 @@
 # coding: utf-8
 import tensorflow as tf
+from pprint import pprint
 from core.utils.tf_utils import linear, batch_gather, shape
 from core.utils.common import dbgprint, dotDict, recDotDefaultDict
 from core.models import ModelBase
@@ -24,8 +25,6 @@ class BagOfCards(ModelBase):
       self.ph.reward = tf.placeholder(tf.float32, [None])
       self.ph.is_end_state = tf.placeholder(tf.bool, shape=[None])
 
-
-
     self.keep_prob = 1.0 - tf.to_float(self.ph.is_training) * config.dropout_rate
     self.q_values = self.inference(self.ph.state) # [batch_size, vocab_size] 
 
@@ -47,7 +46,6 @@ class BagOfCards(ModelBase):
     self.loss = self._clipped_loss(target, filtered_q_values)
     self.updates = self.get_updates(self.loss, self.global_step)
 
-
   def _clipped_loss(self, target, filtered_qs):
     error = tf.abs(target - filtered_qs)
     quadratic = tf.clip_by_value(error, 0.0, 1.0)
@@ -60,14 +58,15 @@ class BagOfCards(ModelBase):
   def get_input_feed(self, batch):
     input_feed = {}
     input_feed[self.ph.state] = batch.state
+    input_feed[self.ph.is_training] = batch.is_training
 
-    if batch.reward is not None and batch.is_end_state is not None:
+    if batch.reward  and batch.is_end_state:
       input_feed[self.ph.reward] = batch.reward
       input_feed[self.ph.is_end_state] = batch.is_end_state
 
-    if batch.action is not None:
+    if batch.action:
       input_feed[self.ph.action] = batch.action
-
+    return input_feed
 
   def inference(self, state):
     with tf.variable_scope('Inference', reuse=tf.AUTO_REUSE):
