@@ -91,14 +91,14 @@ class ExperimentManager(ManagerBase):
       self.logger.info('Epoch %d, Average loss = %f' % (epoch, average_loss))
       model.add_epoch()
 
-  def test(self, model):
+  def test(self, model=None):
     if not model:
       model = self.create_model(self.config)
     batch = common.recDotDefaultDict()
-    state = [[1.0 for _ in range(160)]]
+    state = [[1.0 for _ in range(640)]]
     batch.state = state
     batch.is_training = False
-    res = model.step(batch)
+    res = model.step(batch, 0)
     print (res)
     
 def main(args):
