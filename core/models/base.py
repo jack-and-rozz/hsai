@@ -5,7 +5,7 @@ import tensorflow as tf
 class ModelBase(object):
   def __init__(self, sess, config):
     self.sess = sess
-    self.debug_ops = []
+    self.debug_ops = dotDict()
 
     with tf.name_scope('global_variables'):
       self.global_step = tf.get_variable(

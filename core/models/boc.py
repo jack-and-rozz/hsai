@@ -26,14 +26,12 @@ class BagOfCards(ModelBase):
       self.ph.is_end_state = tf.placeholder(tf.bool, name='ph.is_end_state', 
                                             shape=[None])
 
-
     with tf.name_scope('keep_prob'):
       self.keep_prob = 1.0 - tf.to_float(self.ph.is_training) * config.dropout_rate
 
     self.q_values = self.inference(self.ph.state) # [batch_size, vocab_size] 
 
     # The Q values only of the action chosen in the current step.
-    
     with tf.name_scope('dynamic_batch_size'):
       batch_size = shape(self.ph.state, 0)
 
@@ -45,7 +43,7 @@ class BagOfCards(ModelBase):
       next_state = self.ph.state + tf.one_hot(self.ph.action, config.vocab_size.card)
     with tf.name_scope('next_q_values'):
       next_q_values = self.inference(next_state) # [batch_size, vocab_size]
-      next_q_value_mask = tf.cast(tf.logical_not(self.ph.is_end_state), tf.float32) # [batch_soize]
+      next_q_value_mask = tf.cast(tf.logical_not(self.ph.is_end_state), tf.float32) # [batch_size]
 
     # Target is the sum of and the intermediate reward and the next Q values discounted by gamma if the next state is not an end state. 
     with tf.name_scope('target_value'):
@@ -54,7 +52,8 @@ class BagOfCards(ModelBase):
 
     #self.loss = self._loss(target, filtered_q_values)
     with tf.name_scope('loss'):
-      self.loss = self._clipped_loss(target, filtered_q_values)
+      #self.loss = self._clipped_loss(target, filtered_q_values)
+      self.loss = self._loss(target, filtered_q_values)
     self.updates = self.get_updates(self.loss, self.global_step)
 
   def _clipped_loss(self, target, filtered_qs):
@@ -92,8 +91,16 @@ class BagOfCards(ModelBase):
                           activation=tf.nn.relu, scope=scope)
     return q_values
   
-  def step(self, batch):
+  def step(self, batch, debug=False):
     input_feed = self.get_input_feed(batch)
+
+    self.debug_ops.q_values = self.q_values
+    if debug:
+      for k, v in self.debug_ops.items():
+        print(k)
+        print(v)
+    outputs = self.sess.run(self.debug_ops, input_feed)
+
     output_feed = [self.q_values]
     if batch.is_training:
       output_feed += [self.loss, self.updates]

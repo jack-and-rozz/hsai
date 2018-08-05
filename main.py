@@ -84,7 +84,8 @@ class ExperimentManager(ManagerBase):
 
       average_loss = 0.0
       for i, batch in enumerate(batches):
-        q_values, loss, _ =  model.step(batch)
+        debug= True if i > 100 else False
+        q_values, loss, _ =  model.step(batch, debug=debug)
         average_loss += loss
         print('step = %d, loss = %f' % (i, loss))
       average_loss /= (i+1)
