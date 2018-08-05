@@ -1,11 +1,12 @@
 # coding: utf-8
 import math
 import tensorflow as tf
+from core.utils.common import dotDict
 
 class ModelBase(object):
   def __init__(self, sess, config):
     self.sess = sess
-    self.debug_ops = dotDict()
+    self.debug_ops = []
 
     with tf.name_scope('global_variables'):
       self.global_step = tf.get_variable(

@@ -36,7 +36,7 @@ class BagOfCards(ModelBase):
       batch_size = shape(self.ph.state, 0)
 
     with tf.name_scope('filtered_q_values'):
-      filtered_q_values = tf.reshape(
+      self.filtered_q_values = tf.reshape(
         batch_gather(self.q_values, self.ph.action), [batch_size]) 
 
     with tf.name_scope('next_state'):
@@ -48,12 +48,12 @@ class BagOfCards(ModelBase):
     # Target is the sum of and the intermediate reward and the next Q values discounted by gamma if the next state is not an end state. 
     with tf.name_scope('target_value'):
       target = self.ph.reward + self.gamma * next_q_value_mask * tf.reduce_max(next_q_values, axis=1) # r + gamma * max(Q(s[t+1], a[t+1])) if t+1 != T else r
-      target = tf.stop_gradient(target)
+      self.target = tf.stop_gradient(target)
 
     #self.loss = self._loss(target, filtered_q_values)
     with tf.name_scope('loss'):
       #self.loss = self._clipped_loss(target, filtered_q_values)
-      self.loss = self._loss(target, filtered_q_values)
+      self.loss = self._loss(self.target, self.filtered_q_values)
     self.updates = self.get_updates(self.loss, self.global_step)
 
   def _clipped_loss(self, target, filtered_qs):
@@ -91,15 +91,17 @@ class BagOfCards(ModelBase):
                           activation=tf.nn.relu, scope=scope)
     return q_values
   
-  def step(self, batch, debug=False):
+  def step(self, batch, step):
     input_feed = self.get_input_feed(batch)
 
-    self.debug_ops.q_values = self.q_values
-    if debug:
-      for k, v in self.debug_ops.items():
+    self.debug_ops = [self.q_values, self.filtered_q_values, self.target]
+
+    if step > 100:
+      for k, v in zip(self.debug_ops, self.sess.run(self.debug_ops, input_feed)):
+        print ('Step %d' % step)
         print(k)
         print(v)
-    outputs = self.sess.run(self.debug_ops, input_feed)
+      print ()
 
     output_feed = [self.q_values]
     if batch.is_training:
