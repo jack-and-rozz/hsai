@@ -9,4 +9,4 @@ numpy
 pandas
 scipy
 seaborn
-tensorflow
+tensorflow==1.4.0

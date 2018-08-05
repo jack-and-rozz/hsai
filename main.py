@@ -14,7 +14,7 @@ class ExperimentManager(ManagerBase):
   def __init__(self, args, sess):
     super().__init__(args, sess)
     self.model = None
-    self.dataset = HSReplayDataset
+    self.dataset = HSReplayDataset(config.dataset)
 
   @common.timewatch()
   def create_model(self, config, checkpoint_path=None):
@@ -72,6 +72,7 @@ class ExperimentManager(ManagerBase):
 
   def train(self):
     model = self.create_model(self.config)
+    
     for epoch in range(model.epoch.eval(), self.config.max_epoch):
       sys.stdout.write('Save the model at the begining of epoch %02d as oodel.ckpt-%d\n' % (epoch, epoch))
 
@@ -81,7 +82,7 @@ class ExperimentManager(ManagerBase):
       exit(1)
       batches = self.dataset.get_batches(
         self.config.batch_size, self.config.iterations_per_epoch,
-        is_training=True)
+        model.epoch.eval(), is_training=True)
 
       average_loss = 0.0
       for i, batch in enumerate(batches):
