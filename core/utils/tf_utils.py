@@ -50,7 +50,7 @@ def batch_gather(emb, indices):
 
   return gathered
 
-def linear(inputs, output_size=None,
+def linear(inputs, output_size=None, initializer=None,
            activation=tf.nn.tanh, scope=None):
   """
   Args:
@@ -62,8 +62,11 @@ def linear(inputs, output_size=None,
   with tf.variable_scope(scope or "linear"):
     inputs_rank = len(inputs.get_shape().as_list())
     hidden_size = shape(inputs, -1)
-    w = tf.get_variable('weights', [hidden_size, output_size])
-    b = tf.get_variable('biases', [output_size])
+    initializer = tf.initializers.truncated_normal(stddev=0.01)
+    w = tf.get_variable('weights', [hidden_size, output_size],
+                        initializer=initializer)
+    b = tf.get_variable('biases', [output_size],
+                        initializer=initializer)
     if inputs_rank == 3:
       batch_size = shape(inputs, 0)
       max_sentence_length = shape(inputs, 1)

@@ -36,8 +36,8 @@ class BagOfCards(ModelBase):
       self.keep_prob = 1.0 - tf.to_float(self.ph.is_training) * config.dropout_rate
 
     self.q_values = self.inference(self.ph.state) # [batch_size, vocab_size] 
-    self.q_values = tf.clip_by_value(self.q_values, 0.0, 1.0)
-    
+    #self.q_values = tf.clip_by_value(self.q_values, 0.0, 1.0)
+
     # The Q values only of the action chosen in the current step.
     with tf.name_scope('dynamic_batch_size'):
       batch_size = shape(self.ph.state, 0)
@@ -50,18 +50,22 @@ class BagOfCards(ModelBase):
       next_state = self.ph.next_state
       #next_state = self.ph.state + tf.one_hot(self.ph.action, config.vocab_size.card)
     with tf.name_scope('next_q_values'):
-      next_q_values = self.inference(next_state) # [batch_size, vocab_size]
+      self.next_q_values = self.inference(next_state) # [batch_size, vocab_size]
       next_q_value_mask = tf.cast(tf.logical_not(self.ph.is_end_state), tf.float32) # [batch_size]
+
+    # Clip Q values.
+    #self.next_q_values = tf.clip_by_value(self.next_q_values, 0.0, 1.0)
+
 
     # Target is the sum of and the intermediate reward and the next Q values discounted by gamma if the next state is not an end state. 
     with tf.name_scope('target_value'):
-      target = self.ph.reward + self.gamma * next_q_value_mask * tf.reduce_max(next_q_values, axis=1) # r + gamma * max(Q(s[t+1], a[t+1])) if t+1 != T else r
+      target = self.ph.reward + self.gamma * next_q_value_mask * tf.reduce_max(self.next_q_values, axis=1) # r + gamma * max(Q(s[t+1], a[t+1])) if t+1 != T else r
       self.target = tf.stop_gradient(target)
 
     #self.loss = self._loss(target, filtered_q_values)
     with tf.name_scope('loss'):
-      #self.loss = self._clipped_loss(target, filtered_q_values)
-      self.loss = self._loss(self.target, self.filtered_q_values)
+      self.loss = self._clipped_loss(self.target, self.filtered_q_values)
+      #self.loss = self._loss(self.target, self.filtered_q_values)
     self.updates = self.get_updates(self.loss, self.global_step)
 
   def _clipped_loss(self, target, filtered_qs):
@@ -103,16 +107,16 @@ class BagOfCards(ModelBase):
   def step(self, batch, step):
     input_feed = self.get_input_feed(batch)
 
-    #self.debug_ops = [self.q_values, self.filtered_q_values, self.target]
+    self.debug_ops = [self.filtered_q_values, self.next_q_values, self.target, self.ph.reward]
     self.debug_ops = []
-    if True or step > 0 and self.debug_ops:
+    if self.debug_ops:
       for k, v in zip(self.debug_ops, self.sess.run(self.debug_ops, input_feed)):
         print ('Step %d' % step)
         print(k)
         print(v)
         #print ()
-    #if step == 50:
-    #  exit(1)
+      if step == 50:
+        exit(1)
 
     output_feed = [self.q_values]
     if batch.is_training:
