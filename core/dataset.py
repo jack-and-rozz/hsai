@@ -5,7 +5,7 @@ import glob
 import numpy as np
 from pprint import pprint
 
-def add_replay(data, fpath, max_num_card):
+def add_replay(data, fpath, max_num_card, num_next_candidates_samples):
   fdir, fname = separate_path_and_filename(fpath)
   m = re.match('result-(.+)', fname)
   fkey = m.group(1)
@@ -13,9 +13,9 @@ def add_replay(data, fpath, max_num_card):
   # Read player actions and the state there.
   # log = [state, candidate, action, reward, is_end_state]
   p1fname = 'player1-' + fkey
-  p1log = read_log(os.path.join(fdir, p1fname), max_num_card)
+  p1log = read_log(os.path.join(fdir, p1fname), max_num_card, num_next_candidates_samples)
   p2fname = 'player2-' + fkey
-  p2log = read_log(os.path.join(fdir, p2fname), max_num_card)
+  p2log = read_log(os.path.join(fdir, p2fname), max_num_card, num_next_candidates_samples)
 
   if not p1log or not p2log: # Log parse error
     return
@@ -46,7 +46,7 @@ def state_to_onehot(state, max_num_card):
   return one_hot_state
     
 
-def read_log(fpath, max_num_card):
+def read_log(fpath, max_num_card, num_next_candidates_samples):
   if not os.path.exists(fpath):
     return 
   logs = [l.strip() for l in open(fpath)]
@@ -71,6 +71,7 @@ def read_log(fpath, max_num_card):
     # Convert state format from [num_card0, num_card1, ....] to [card0_0, card0_1, ... card0_max_num_card, card1_0, ...]. Each element must be 0 or 1.
     d.state = state_to_onehot(state, max_num_card)
     d.next_state = state_to_onehot(new_state, max_num_card)
+    d.next_candidates = [random.sample(range(160), 3) for _ in range(num_next_candidates_samples)] # Since the next candidates are unknown by all rights, the next expected Q-values are aproximated by sampling.
     d.candidates = candidates
     d.action = action
     d.reward = reward
@@ -84,6 +85,7 @@ class HSReplayDataset(object):
     self.iterations_per_epoch = config.iterations_per_epoch
     self.memory_size = config.memory_size
     self.max_num_card = config.max_num_card
+    self.num_next_candidates_samples = config.num_next_candidates_samples
     pass
 
   def read_data(self, replay_path):
@@ -103,7 +105,7 @@ class HSReplayDataset(object):
     for i, fpath in enumerate(replays):
       if i % (len(replays) // 10) == 0:
         sys.stderr.write('Reading logs from \'%s\' ... (%d/%d)\n' % (replay_path, i, len(replays)))
-      add_replay(data, fpath, self.max_num_card)
+      add_replay(data, fpath, self.max_num_card, self.num_next_candidates_samples)
 
     flat_data = []
     for d in data.values():
