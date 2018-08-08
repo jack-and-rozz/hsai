@@ -25,6 +25,7 @@ fi
 while true 
 do
     echo "java -jar $jar_path $exe_path1 $exe_path2 $model_dir $log_dir"
-    java -jar $jar_path $exe_path1 $exe_path2 $model_dir $log_dir
+    java -jar $jar_path $exe_path1 $exe_path2 $model_dir $log_dir &
+    java -jar $jar_path $exe_path1 $exe_path2 $model_dir $log_dir &
     wait
 done
