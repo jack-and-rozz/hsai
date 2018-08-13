@@ -316,7 +316,7 @@ int main(int argc,char *argv[]){
 
     for(int i = 0; i < 13; i ++){
         cout << "Mana:" << i  << endl;
-        for(int n = 0; n < 30; n ++){
+        for(int n = 0; n < 31; n ++){
             double winRate = (double)(manaCurveWin[i][n]) / (double)(manaCurveWin[i][n] + manaCurveLose[i][n]);
             cout << n << ":" << winRate << ",";
         }
@@ -325,7 +325,7 @@ int main(int argc,char *argv[]){
 
     for(int i = 0; i < 13; i ++){
         cout << "manaCurve[" + i << "]"; 
-        for(int n = 0; n < 30; n ++){
+        for(int n = 0; n < 31; n ++){
             cout << "[" << n << "]={";
             double winRate = (double)(manaCurveWin[i][n]) / (double)(manaCurveWin[i][n] + manaCurveLose[i][n]);
             cout << winRate << ",";
@@ -355,8 +355,8 @@ int main(int argc,char *argv[]){
     }
 
     for(int i = 0; i < 160; i ++){
-        cout << "cardWinrate[" + i << "]={"; 
-        for(int n = 0; n < 30; n ++){
+        cout << "cardWinrate[" << i << "]={"; 
+        for(int n = 0; n < 31; n ++){
             double winRate1 = (double)(cardTotalWin[0][i][n] + cardTotalWin[1][i][n]) / (double)(cardTotalWin[0][i][n] + cardTotalLose[0][i][n] + cardTotalWin[1][i][n] + cardTotalLose[1][i][n]);
             cout << winRate1 << ",";
         }
