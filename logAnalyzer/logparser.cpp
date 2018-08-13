@@ -301,10 +301,10 @@ int main(int argc,char *argv[]){
         avarageWinRate[i] = (double)playerWin[i] / (double)(playerWin[0] + playerWin[1]);
     }
     cout << avarageWinRate[0] << "/" << avarageWinRate[1] << endl;
-    for(int i = 0; i < 160; i ++){
-        /*double winRate1 = (double)cardWin[0][i] / (double)(cardWin[0][i] + cardLose[0][i]);
-        double winRate2 = (double)cardWin[1][i] / (double)(cardWin[1][i] + cardLose[1][i]);
-        cout << i + 1 << ":" << winRate1 - avarageWinRate[0] << "/" << winRate2 - avarageWinRate[1] << endl;*/
+    /*for(int i = 0; i < 160; i ++){
+        //double winRate1 = (double)cardWin[0][i] / (double)(cardWin[0][i] + cardLose[0][i]);
+        //double winRate2 = (double)cardWin[1][i] / (double)(cardWin[1][i] + cardLose[1][i]);
+        //cout << i + 1 << ":" << winRate1 - avarageWinRate[0] << "/" << winRate2 - avarageWinRate[1] << endl;
         double winRate1 = (double)(cardWin[0][i] + cardWin[1][i]) / (double)(cardWin[0][i] + cardLose[0][i] + cardWin[1][i] + cardLose[1][i]);
         cout << i + 1 << ":" << winRate1 - 0.5 << endl;
     }
@@ -312,7 +312,7 @@ int main(int argc,char *argv[]){
     for(int i = 0; i < 160; i ++){
         double winRate1 = (double)(cardWin[0][i] + cardWin[1][i]) / (double)(cardWin[0][i] + cardLose[0][i] + cardWin[1][i] + cardLose[1][i]);
         cout << winRate1 - 0.5 << ",";
-    }
+    }*/
 
     for(int i = 0; i < 13; i ++){
         cout << "Mana:" << i  << endl;
@@ -321,6 +321,16 @@ int main(int argc,char *argv[]){
             cout << n << ":" << winRate << ",";
         }
         cout << endl;
+    }
+
+    for(int i = 0; i < 13; i ++){
+        cout << "manaCurve[" + i << "]"; 
+        for(int n = 0; n < 30; n ++){
+            cout << "[" << n << "]={";
+            double winRate = (double)(manaCurveWin[i][n]) / (double)(manaCurveWin[i][n] + manaCurveLose[i][n]);
+            cout << winRate << ",";
+        }
+        cout << "};" << endl;
     }
 
     int* totalManaCurve = new int[13];
@@ -340,6 +350,16 @@ int main(int argc,char *argv[]){
         for(int n = 0; n < 31; n ++){
             double winRate1 = (double)(cardTotalWin[0][i][n] + cardTotalWin[1][i][n]) / (double)(cardTotalWin[0][i][n] + cardTotalLose[0][i][n] + cardTotalWin[1][i][n] + cardTotalLose[1][i][n]);
             cout << n << ":" << winRate1 << " ";
+        }
+        cout << endl;
+    }
+
+    for(int i = 0; i < 160; i ++){
+        cout << "cardWinrate[" + i << "]"; 
+        for(int n = 0; n < 31; n ++){
+            cout << "[" << n << "]={";
+            double winRate1 = (double)(cardTotalWin[0][i][n] + cardTotalWin[1][i][n]) / (double)(cardTotalWin[0][i][n] + cardTotalLose[0][i][n] + cardTotalWin[1][i][n] + cardTotalLose[1][i][n]);
+            cout << winRate1 << ",";
         }
         cout << endl;
     }
