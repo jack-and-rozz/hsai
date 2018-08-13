@@ -354,14 +354,19 @@ int main(int argc,char *argv[]){
         cout << endl;
     }
 
+    cout << "cardWinrate={"; 
     for(int i = 0; i < 160; i ++){
-        cout << "cardWinrate[" << i << "]={"; 
+        cout << "{"; 
         for(int n = 0; n < 31; n ++){
             double winRate1 = (double)(cardTotalWin[0][i][n] + cardTotalWin[1][i][n]) / (double)(cardTotalWin[0][i][n] + cardTotalLose[0][i][n] + cardTotalWin[1][i][n] + cardTotalLose[1][i][n]);
-            cout << winRate1 << ",";
+            cout << winRate1;
+            if(n != 30){
+                cout << ",";
+            }
         }
-        cout << "};" << endl;
+        cout << "}," << endl;
     }
+    cout << "};" << endl;
 
     cout << endl << "****card: typecount****" << endl;
     for(int i = 0; i < 4; i ++){
