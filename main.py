@@ -2,7 +2,8 @@
 import sys, os, random, copy, socket, time, re, argparse
 from collections import OrderedDict
 from pprint import pprint
-from core.dataset import HSReplayDataset
+import core.dataset
+#from core.dataset import HSReplayDataset
 import core.models
 import tensorflow as tf
 import numpy as np
@@ -14,6 +15,8 @@ class ExperimentManager(ManagerBase):
   def __init__(self, args, sess):
     super().__init__(args, sess)
     self.model = None
+    #self.dataset = HSReplayDataset(self.replays_path, self.config.dataset)
+    dataset_type = getattr(core.models, config.dataset.dataset_type)
     self.dataset = HSReplayDataset(self.replays_path, self.config.dataset)
 
   @common.timewatch()
@@ -89,6 +92,11 @@ class ExperimentManager(ManagerBase):
         print('step = %d, loss = %f' % (i, loss))
       average_loss /= (i+1)
       self.logger.info('Epoch %d, Average loss = %f' % (epoch, average_loss))
+      summary_dict = {}
+      summary_dict["train/loss"] = average_loss
+      summary = tf_utils.make_summary(summary_dict)
+      self.summary_writer.add_summary(summary, model.epoch.eval())
+
       model.add_epoch()
 
   def test(self, model=None):

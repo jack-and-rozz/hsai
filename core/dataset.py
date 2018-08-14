@@ -5,37 +5,8 @@ import glob
 import numpy as np
 from pprint import pprint
 
-def add_replay(data, fpath, max_num_card, num_next_candidates_samples):
-  fdir, fname = separate_path_and_filename(fpath)
-  m = re.match('result-(.+)', fname)
-  fkey = m.group(1)
-
-  # Read player actions and the state there.
-  # log = [state, candidate, action, reward, is_end_state]
-  p1fname = 'player1-' + fkey
-  p1log = read_log(os.path.join(fdir, p1fname), max_num_card, num_next_candidates_samples)
-  p2fname = 'player2-' + fkey
-  p2log = read_log(os.path.join(fdir, p2fname), max_num_card, num_next_candidates_samples)
-
-  if not p1log or not p2log: # Log parse error
-    return
-
-  l = open(fpath).readline().split() # Read the result of the game
-
-  # Set the result of the game as reward.
-  p1log[-1].reward = int(l[0])
-  p2log[-1].reward = int(l[1])
-  #p1log[-1].reward = 1 if int(l[0]) == 1 else -1
-  #p2log[-1].reward = 1 if int(l[1]) == 1 else -1
-  p1log[-1].is_end_state = True
-  p2log[-1].is_end_state = True
-  try:
-    data[fkey] = [p1log, p2log]
-  except:
-    print(data)
-    print(fkey)
-    exit(1)
-  return data
+WIN_REWARD = 1 
+LOSE_REWARD = -1
 
 def state_to_onehot(state, max_num_card):
   # Expand the dimensions of state by max_num_card.
@@ -77,6 +48,7 @@ def read_log(fpath, max_num_card, num_next_candidates_samples):
     d.reward = reward
     d.is_end_state = is_end_state
     data.append(d)
+  data[-1].is_end_state = True
   return data
 
 class HSReplayDataset(object):
@@ -86,7 +58,8 @@ class HSReplayDataset(object):
     self.memory_size = config.memory_size
     self.max_num_card = config.max_num_card
     self.num_next_candidates_samples = config.num_next_candidates_samples
-    pass
+    self.td_lambda = config.td_lambda
+    self.td_gamma = config.td_gamma
 
   def read_data(self, replay_path):
     '''
@@ -105,24 +78,67 @@ class HSReplayDataset(object):
     for i, fpath in enumerate(replays):
       if i % (len(replays) // 10) == 0:
         sys.stderr.write('Reading logs from \'%s\' ... (%d/%d)\n' % (replay_path, i, len(replays)))
-      add_replay(data, fpath, self.max_num_card, self.num_next_candidates_samples)
-
-    flat_data = []
-    for d in data.values():
-      for x in d:
-        flat_data += x
-    return flat_data
+      self.add_replay(data, fpath)
+    return data
 
   def get_batches(self, batch_size, current_epoch, 
                   random_sample=True, is_training=True):
     dataset_path = os.path.join(self.dataset_path, '%03d' % current_epoch)
-    data = self.read_data(dataset_path)
+    data = self.read_data(dataset_path) 
+    # data[replay_id] = [p1_episode, p2_episode]
+    # episode = [data_turn0, data_turn1, ...]
+
+    flat_data = []
+    for d in data.values():
+      for episode in d: 
+        flat_data += episode
+
     for i in range(self.iterations_per_epoch):
       batch = recDotDefaultDict()
       batch.is_training = is_training 
       if random_sample:
-        sampled_data = random.sample(data, batch_size)
+        sampled_data = random.sample(flat_data, batch_size)
         for d in sampled_data:
           batching_dicts(batch, d)
         yield batch
-  
+
+  def read_log(self, fpath):
+    fdir, fname = separate_path_and_filename(fpath)
+    m = re.match('result-(.+)', fname)
+    fkey = m.group(1)
+    
+    # Read player actions and the state there.
+    # log = [state, candidate, action, reward, is_end_state]
+    p1fname = 'player1-' + fkey
+    p1log = read_log(os.path.join(fdir, p1fname), self.max_num_card, self.num_next_candidates_samples)
+    p2fname = 'player2-' + fkey
+    p2log = read_log(os.path.join(fdir, p2fname), self.max_num_card, self.num_next_candidates_samples)
+
+    if not p1log or not p2log: # Log parse error
+      return
+
+    result = open(fpath).readline().split() # Read the result of the game
+    # Set the result of the game as reward.
+    p1log[-1].reward = WIN_REWARD if int(result[0]) == 1 else LOSE_REWARD
+    p2log[-1].reward = WIN_REWARD if int(result[1]) == 1 else LOSE_REWARD
+    return fkey, p1log, p2log
+
+  def add_replay(self, data, fpath):
+    fkey, p1log, p2log = self.read_log(fpath)
+    
+    # Propagate rewards from the last state for N-step TD.
+    T = len(p1log)
+    for t in range(T):
+      p1log[t].reward = (self.td_gamma ** (T - t - 1)) * p1log[-1].reward
+      p2log[t].reward = (self.td_gamma ** (T - t - 1)) * p2log[-1].reward
+    data[fkey] = [p1log, p2log]
+    return data
+
+class SequencialHSReplayDataset(object):
+  def __init__(self, dataset_path, config):
+    super().__init__(self, dataset_path, config)
+
+  def add_replay(self, data, fpath):
+    fkey, p1log, p2log = self.read_log(fpath)
+    data[fkey] = [p1log, p2log]
+    return data

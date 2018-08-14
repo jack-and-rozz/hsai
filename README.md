@@ -1,12 +1,11 @@
 # hsai
 
+### How to use
 
-#### To run trainer
-1. 
-'''
-python main.py *model_path* train
-'''
+* Run trainer
 
-'''
-./simulator/checkjar.sh *model_path*
-'''
+``` python main.py ${model_path} train ```
+
+* Run simulator
+
+``` ./simulator/checkjar.sh ${model_path} ```

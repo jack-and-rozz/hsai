@@ -17,7 +17,7 @@ class BagOfCards(ModelBase):
     self.num_ff_layers = config.num_ff_layers
     self.vocab_size = config.vocab_size
     self.max_num_card = config.max_num_card
-    self.gamma = config.gamma
+    self.td_gamma = config.td_gamma
 
     # Define placeholders.
     with tf.name_scope('Placeholders'):
@@ -61,7 +61,7 @@ class BagOfCards(ModelBase):
 
     with tf.name_scope('next_state'):
       next_state = self.ph.next_state
-      #next_state = self.ph.state + tf.one_hot(self.ph.action, config.vocab_size.card)
+
     with tf.name_scope('next_q_values'):
       self.next_q_values = self.inference(next_state) # [batch_size, vocab_size]
 
@@ -93,7 +93,7 @@ class BagOfCards(ModelBase):
     with tf.name_scope('target_value'):
       # The next expected Q-value is ignored if this step is end state.
       is_end_state_mask = tf.cast(tf.logical_not(self.ph.is_end_state), tf.float32) # [batch_size]
-      target = self.ph.reward + self.gamma * is_end_state_mask * self.expected_next_q_value # r + gamma * max(Q(s[t+1], a[t+1])) if t+1 != T else r
+      target = self.ph.reward + self.td_gamma * is_end_state_mask * self.expected_next_q_value # r + gamma * max(Q(s[t+1], a[t+1])) if t+1 != T else r
       self.target = tf.stop_gradient(target)
 
     #self.loss = self._loss(target, filtered_q_values)
@@ -142,16 +142,22 @@ class BagOfCards(ModelBase):
   def step(self, batch, step):
     input_feed = self.get_input_feed(batch)
 
-    self.debug_ops = [self.q_values_of_selected_action,  self.masked_next_q_values, self.expected_next_q_value, self.target, self.ph.reward]
+    #self.debug_ops = [self.q_values_of_selected_action,  self.masked_next_q_values, self.expected_next_q_value, self.target, self.ph.reward]
+    self.debug_ops = [
+      self.q_values_of_selected_action,  
+      #self.masked_next_q_values, 
+      self.expected_next_q_value, 
+      #self.target, self.ph.reward,
+    ]
     #self.debug_ops = []
     if self.debug_ops:
       for k, v in zip(self.debug_ops, self.sess.run(self.debug_ops, input_feed)):
         print ('Step %d' % step)
-        print(k)
-        print(v)
+        print(k, v)
+        #print(v)
         #print ()
-      if step == 500:
-        exit(1)
+      #if step == 1000:
+      #  exit(1)
 
     output_feed = [self.q_values]
     if batch.is_training:
