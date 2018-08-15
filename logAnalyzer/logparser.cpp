@@ -127,6 +127,7 @@ int main(int argc,char *argv[]){
     }
 
     string searchDir = argv[1];
+    string onlyWins = argv[2];
     
 
     // dirElements にはディレクトリ内の要素数が入る
@@ -172,6 +173,11 @@ int main(int argc,char *argv[]){
                 if(errorFlag){
                     continue;
                 }
+
+                if(onlyWins == "wins"){
+                    continue;
+                }
+
                 // load final deck player 1
                 std::ifstream ifs1(searchDir + "/player1-" + matchID + ".txt");
                 if (ifs1.fail())
@@ -238,7 +244,7 @@ int main(int argc,char *argv[]){
                 if (ifs2.fail())
                 {
                     std::cerr << "失敗" << std::endl;
-                    return -1;
+                    continue;
                 }
                 lineNo = 0;
                 while (getline(ifs2, str))
@@ -301,7 +307,10 @@ int main(int argc,char *argv[]){
         avarageWinRate[i] = (double)playerWin[i] / (double)(playerWin[0] + playerWin[1]);
     }
     cout << avarageWinRate[0] << "/" << avarageWinRate[1] << endl;
-    /*for(int i = 0; i < 160; i ++){
+    if(onlyWins == "wins"){
+        return 0;
+    }
+    for(int i = 0; i < 160; i ++){
         //double winRate1 = (double)cardWin[0][i] / (double)(cardWin[0][i] + cardLose[0][i]);
         //double winRate2 = (double)cardWin[1][i] / (double)(cardWin[1][i] + cardLose[1][i]);
         //cout << i + 1 << ":" << winRate1 - avarageWinRate[0] << "/" << winRate2 - avarageWinRate[1] << endl;
@@ -309,10 +318,17 @@ int main(int argc,char *argv[]){
         cout << i + 1 << ":" << winRate1 - 0.5 << endl;
     }
 
+    cout << "sente:"  << endl;
     for(int i = 0; i < 160; i ++){
-        double winRate1 = (double)(cardWin[0][i] + cardWin[1][i]) / (double)(cardWin[0][i] + cardLose[0][i] + cardWin[1][i] + cardLose[1][i]);
-        cout << winRate1 - 0.5 << ",";
-    }*/
+        double winRate1 = (double)(cardWin[0][i] ) / (double)(cardWin[0][i] + cardLose[0][i]);
+        cout << winRate1 << ",";
+    }
+
+    cout << "gote:"  << endl;
+    for(int i = 0; i < 160; i ++){
+        double winRate1 = (double)(cardWin[1][i]) / (double)(cardWin[1][i] + cardLose[1][i]);
+        cout << winRate1 << ",";
+    }
 
     for(int i = 0; i < 13; i ++){
         cout << "Mana:" << i  << endl;
