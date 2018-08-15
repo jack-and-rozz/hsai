@@ -358,12 +358,12 @@ int main(int argc,char *argv[]){
     for(int j = 0; j < 2; j ++){
         cout << "manaCurve[" << i << "]"; 
         for(int i = 0; i < 13; i ++){
-            cout << "[" << i << "]={";
+            cout << "={";
             for(int n = 0; n < 31; n ++){
                 double winRate = (double)(manaCurveWin[j][i][n]) / (double)(manaCurveWin[j][i][n] + manaCurveLose[j][i][n]);
                 cout << winRate << ",";
             }
-            cout << "};" << endl;
+            cout << "}," << endl;
         }
     }
 
