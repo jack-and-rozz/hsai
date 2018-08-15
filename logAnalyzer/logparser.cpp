@@ -327,13 +327,13 @@ int main(int argc,char *argv[]){
     cout << "sente:"  << endl;
     for(int i = 0; i < 160; i ++){
         double winRate1 = (double)(cardWin[0][i] ) / (double)(cardWin[0][i] + cardLose[0][i]);
-        cout << winRate1 << ",";
+        cout << winRate1 - avarageWinRate[0] << ",";
     }
 
     cout << "gote:"  << endl;
     for(int i = 0; i < 160; i ++){
         double winRate1 = (double)(cardWin[1][i]) / (double)(cardWin[1][i] + cardLose[1][i]);
-        cout << winRate1 << ",";
+        cout << winRate1 - avarageWinRate[1] << ",";
     }
 
     for(int i = 0; i < 13; i ++){
@@ -356,10 +356,10 @@ int main(int argc,char *argv[]){
 
 
     for(int j = 0; j < 2; j ++){
+        cout << "manaCurve[" << i << "]"; 
         for(int i = 0; i < 13; i ++){
-            cout << "manaCurve[" + i << "]"; 
+            cout << "[" << i << "]={";
             for(int n = 0; n < 31; n ++){
-                cout << "[" << n << "]={";
                 double winRate = (double)(manaCurveWin[j][i][n]) / (double)(manaCurveWin[j][i][n] + manaCurveLose[j][i][n]);
                 cout << winRate << ",";
             }
@@ -392,7 +392,21 @@ int main(int argc,char *argv[]){
     for(int i = 0; i < 160; i ++){
         cout << "{"; 
         for(int n = 0; n < 31; n ++){
-            double winRate1 = (double)(cardTotalWin[0][i][n] + cardTotalWin[1][i][n]) / (double)(cardTotalWin[0][i][n] + cardTotalLose[0][i][n] + cardTotalWin[1][i][n] + cardTotalLose[1][i][n]);
+            double winRate1 = (double)(cardTotalWin[0][i][n]) / (double)(cardTotalWin[0][i][n] + cardTotalLose[0][i][n]);
+            cout << winRate1;
+            if(n != 30){
+                cout << ",";
+            }
+        }
+        cout << "}," << endl;
+    }
+    cout << "};" << endl;
+
+    cout << "cardWinrate={"; 
+    for(int i = 0; i < 160; i ++){
+        cout << "{"; 
+        for(int n = 0; n < 31; n ++){
+            double winRate1 = (double)(cardTotalWin[1][i][n]) / (double)(cardTotalWin[1][i][n] + cardTotalLose[1][i][n]);
             cout << winRate1;
             if(n != 30){
                 cout << ",";
