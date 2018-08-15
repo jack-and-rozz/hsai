@@ -16,8 +16,8 @@ class ExperimentManager(ManagerBase):
     super().__init__(args, sess)
     self.model = None
     #self.dataset = HSReplayDataset(self.replays_path, self.config.dataset)
-    dataset_type = getattr(core.models, config.dataset.dataset_type)
-    self.dataset = HSReplayDataset(self.replays_path, self.config.dataset)
+    dataset_type = getattr(core.dataset, self.config.dataset.dataset_type)
+    self.dataset = dataset_type(self.replays_path, self.config.dataset)
 
   @common.timewatch()
   def create_model(self, config, checkpoint_path=None):

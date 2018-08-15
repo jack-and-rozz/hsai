@@ -93,7 +93,10 @@ class BagOfCards(ModelBase):
     with tf.name_scope('target_value'):
       # The next expected Q-value is ignored if this step is end state.
       is_end_state_mask = tf.cast(tf.logical_not(self.ph.is_end_state), tf.float32) # [batch_size]
-      target = self.ph.reward + self.td_gamma * is_end_state_mask * self.expected_next_q_value # r + gamma * max(Q(s[t+1], a[t+1])) if t+1 != T else r
+
+      # N-step TD (N->inf) の状況では r <- Q(s,t) でok
+      #target = self.ph.reward + self.td_gamma * is_end_state_mask * self.expected_next_q_value # r + gamma * max(Q(s[t+1], a[t+1])) if t+1 != T else r
+      target = self.ph.reward
       self.target = tf.stop_gradient(target)
 
     #self.loss = self._loss(target, filtered_q_values)
