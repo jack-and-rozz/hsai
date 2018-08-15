@@ -72,11 +72,17 @@ int main(int argc,char *argv[]){
         }
     }
 
-    long** manaCurveWin = new long* [13];
-    long** manaCurveLose = new long* [13];
+    long*** manaCurveWin = new long** [2];
+    manaCurveWin[0] = new long*[13];
+    manaCurveWin[1] = new long*[13];
+    long*** manaCurveLose = new long** [2];
+    manaCurveLose[0] = new long*[13];
+    manaCurveLose[1] = new long*[13];
     for(int i = 0; i < 13; i ++){
-        manaCurveWin[i] = new long[31];
-        manaCurveLose[i] = new long[31];
+        manaCurveWin[0][i] = new long[31];
+        manaCurveLose[0][i] = new long[31];
+        manaCurveWin[1][i] = new long[31];
+        manaCurveLose[1][i] = new long[31];
     }
 
     long*** cardTypeWin = new long**[2];
@@ -221,10 +227,10 @@ int main(int argc,char *argv[]){
                         }
                         for(int i = 0; i < 13; i ++){
                             if(winPlayer == 1){
-                                manaCurveWin[i][manaCurve[i]] += 1;
+                                manaCurveWin[0][i][manaCurve[i]] += 1;
                             }
                             else{
-                                manaCurveLose[i][manaCurve[i]] += 1;
+                                manaCurveLose[0][i][manaCurve[i]] += 1;
                             }
                         }
                         for(int i = 0; i < 4; i ++){
@@ -280,10 +286,10 @@ int main(int argc,char *argv[]){
                         }
                         for(int i = 0; i < 13; i ++){
                             if(winPlayer == 2){
-                                manaCurveWin[i][manaCurve[i]] += 1;
+                                manaCurveWin[1][i][manaCurve[i]] += 1;
                             }
                             else{
-                                manaCurveLose[i][manaCurve[i]] += 1;
+                                manaCurveLose[1][i][manaCurve[i]] += 1;
                             }
                         }
                         for(int i = 0; i < 4; i ++){
@@ -331,22 +337,34 @@ int main(int argc,char *argv[]){
     }
 
     for(int i = 0; i < 13; i ++){
-        cout << "Mana:" << i  << endl;
+        cout << "ManaSente:" << i  << endl;
         for(int n = 0; n < 31; n ++){
-            double winRate = (double)(manaCurveWin[i][n]) / (double)(manaCurveWin[i][n] + manaCurveLose[i][n]);
+            double winRate = (double)(manaCurveWin[0][i][n]) / (double)(manaCurveWin[0][i][n] + manaCurveLose[0][i][n]);
             cout << n << ":" << winRate << ",";
         }
         cout << endl;
     }
 
     for(int i = 0; i < 13; i ++){
-        cout << "manaCurve[" + i << "]"; 
+        cout << "ManaGote:" << i  << endl;
         for(int n = 0; n < 31; n ++){
-            cout << "[" << n << "]={";
-            double winRate = (double)(manaCurveWin[i][n]) / (double)(manaCurveWin[i][n] + manaCurveLose[i][n]);
-            cout << winRate << ",";
+            double winRate = (double)(manaCurveWin[1][i][n]) / (double)(manaCurveWin[1][i][n] + manaCurveLose[1][i][n]);
+            cout << n << ":" << winRate << ",";
         }
-        cout << "};" << endl;
+        cout << endl;
+    }
+
+
+    for(int j = 0; j < 2; j ++){
+        for(int i = 0; i < 13; i ++){
+            cout << "manaCurve[" + i << "]"; 
+            for(int n = 0; n < 31; n ++){
+                cout << "[" << n << "]={";
+                double winRate = (double)(manaCurveWin[j][i][n]) / (double)(manaCurveWin[j][i][n] + manaCurveLose[j][i][n]);
+                cout << winRate << ",";
+            }
+            cout << "};" << endl;
+        }
     }
 
     int* totalManaCurve = new int[13];
