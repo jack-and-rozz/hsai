@@ -9,4 +9,5 @@ numpy
 pandas
 scipy
 seaborn
-tensorflow==1.4.0
+#tensorflow==1.4.0
+tensorflow-gpu==1.4.0

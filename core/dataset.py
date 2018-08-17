@@ -117,15 +117,20 @@ class HSReplayDataset(object):
     if not p1log or not p2log: # Log parse error
       return
 
-    result = open(fpath).readline().split() # Read the result of the game
+    result = [int(x) for x in open(fpath).readline().split()] # Read the result of the game
     # Set the result of the game as reward.
-    p1log[-1].reward = WIN_REWARD if int(result[0]) == 1 else LOSE_REWARD
-    p2log[-1].reward = WIN_REWARD if int(result[1]) == 1 else LOSE_REWARD
+    if result[0] == -1 or result[1] == -1:
+      return None
+    p1log[-1].reward = WIN_REWARD if result[0] == 1 else LOSE_REWARD
+    p2log[-1].reward = WIN_REWARD if result[1] == 1 else LOSE_REWARD
     return fkey, p1log, p2log
 
   def add_replay(self, data, fpath):
-    fkey, p1log, p2log = self.read_log(fpath)
-    
+    log = self.read_log(fpath)
+    if not log:
+      return 
+    fkey, p1log, p2log = log
+
     # Propagate rewards from the last state for N-step TD.
     T = len(p1log)
     for t in range(T):
