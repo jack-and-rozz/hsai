@@ -39,21 +39,15 @@ int main(int argc,char *argv[]){
     struct dirent **namelist=NULL;
     struct dirent **parentNameList=NULL;
 
-    long** cardWin = new long*[2];
-    cardWin[0] = new long[160];
-    cardWin[1] = new long[160];
-    long** cardLose = new long*[2];
-    cardLose[0] = new long[160];
-    cardLose[1] = new long[160];
-    
-    int* cardCosts = new int[160];
-    int* cardTypes = new int[160];
-
-    for(int i = 0; i < 160; i ++){
-        cardWin[0][i] = 0;
-        cardLose[0][i] = 0;
-        cardWin[1][i] = 0;
-        cardLose[1][i] = 0;
+    double** cardValue = new double*[2];
+    double** cardDataCount = new double*[2];
+    for(int n = 0; n < 2; n ++){
+        cardValue[n] = new double[160];
+        cardDataCount[n] = new double[160];
+        for(int i = 0; i < 160; i ++){
+            cardValue[n][i] = 0;
+            cardDataCount[n][i] = 0;
+        }
     }
 
     long*** cardTotalWin = new long**[2];
@@ -101,9 +95,9 @@ int main(int argc,char *argv[]){
         }
     }
 
-    int* playerWin = new int[2];
-    playerWin[0] = 0;
-    playerWin[1] = 0;
+
+    int* cardCosts = new int[160];
+    int* cardTypes = new int[160];
 
     // parse cardlist
     std::ifstream ifs("cardlist.txt");
@@ -169,6 +163,23 @@ int main(int argc,char *argv[]){
                         continue;
                     }
                     cout << "scan " << string(parentNameList[n] -> d_name) <<  endl;
+
+                    long** cardWin = new long*[2];
+                    cardWin[0] = new long[160];
+                    cardWin[1] = new long[160];
+                    long** cardLose = new long*[2];
+                    cardLose[0] = new long[160];
+                    cardLose[1] = new long[160];
+                    int* playerWin = new int[2];
+                    playerWin[0] = 0;
+                    playerWin[1] = 0;
+
+                    for(int i = 0; i < 160; i ++){
+                        cardWin[0][i] = 0;
+                        cardLose[0][i] = 0;
+                        cardWin[1][i] = 0;
+                        cardLose[1][i] = 0;
+                    }
 
                     //ディレクトリかファイルかを順番に識別
                     for (i=0; i<dirElements; i+=1) {
@@ -331,128 +342,24 @@ int main(int argc,char *argv[]){
                             }
                         }
                     }
+                    for(int n = 0; n < 2; n ++){
+                        for(int i = 0; i < 160; i ++){
+                            double winRate = (double)playerWin[n] / (double)(playerWin[0] + playerWin[1]);
+                            double currentCardValue = (double)cardWin[n][i] / (double)(cardWin[n][i] + cardLose[n][i]) - winRate;
+                            double currentCount = (double)(playerWin[0] + playerWin[1]);
+                            cardValue[n][i] = (cardValue[n][i] * cardDataCount[n][i] + currentCardValue * currentCount) / (currentCount + cardDataCount[n][i]);
+                            cardDataCount[n][i] += currentCount;
+                        }
+                    }
                 }
             }
         }
     }
-
-    double avarageWinRate[2];
-    cout << "totalScan:" << (playerWin[0] + playerWin[1]) / 2 << endl;
-    for(int i = 0; i < 2; i ++){
-        avarageWinRate[i] = (double)playerWin[i] / (double)(playerWin[0] + playerWin[1]);
-    }
-    cout << avarageWinRate[0] << "/" << avarageWinRate[1] << endl;
-    if(onlyWins == "wins"){
-        return 0;
-    }
-    for(int i = 0; i < 160; i ++){
-        //double winRate1 = (double)cardWin[0][i] / (double)(cardWin[0][i] + cardLose[0][i]);
-        //double winRate2 = (double)cardWin[1][i] / (double)(cardWin[1][i] + cardLose[1][i]);
-        //cout << i + 1 << ":" << winRate1 - avarageWinRate[0] << "/" << winRate2 - avarageWinRate[1] << endl;
-        double winRate1 = (double)(cardWin[0][i] + cardWin[1][i]) / (double)(cardWin[0][i] + cardLose[0][i] + cardWin[1][i] + cardLose[1][i]);
-        cout << i + 1 << ":" << winRate1 - 0.5 << endl;
-    }
-
-    cout << "sente:"  << endl;
-    for(int i = 0; i < 160; i ++){
-        double winRate1 = (double)(cardWin[0][i] ) / (double)(cardWin[0][i] + cardLose[0][i]);
-        cout << winRate1 - avarageWinRate[0] << ",";
-    }
-
-    cout << "gote:"  << endl;
-    for(int i = 0; i < 160; i ++){
-        double winRate1 = (double)(cardWin[1][i]) / (double)(cardWin[1][i] + cardLose[1][i]);
-        cout << winRate1 - avarageWinRate[1] << ",";
-    }
-
-    for(int i = 0; i < 13; i ++){
-        cout << "ManaSente:" << i  << endl;
-        for(int n = 0; n < 31; n ++){
-            double winRate = (double)(manaCurveWin[0][i][n]) / (double)(manaCurveWin[0][i][n] + manaCurveLose[0][i][n]);
-            cout << n << ":" << winRate << ",";
+    for(int n = 0; n < 2; n ++){
+        cout << "player:" << n << endl;
+        for(int i = 0; i < 160; i ++){
+            cout << i + 1 << ":" << cardValue[n][i] << endl;
         }
-        cout << endl;
-    }
-
-    for(int i = 0; i < 13; i ++){
-        cout << "ManaGote:" << i  << endl;
-        for(int n = 0; n < 31; n ++){
-            double winRate = (double)(manaCurveWin[1][i][n]) / (double)(manaCurveWin[1][i][n] + manaCurveLose[1][i][n]);
-            cout << n << ":" << winRate << ",";
-        }
-        cout << endl;
-    }
-
-
-    for(int j = 0; j < 2; j ++){
-        cout << "manaCurve[" << i << "]"; 
-        for(int i = 0; i < 13; i ++){
-            cout << "={";
-            for(int n = 0; n < 31; n ++){
-                double winRate = (double)(manaCurveWin[j][i][n]) / (double)(manaCurveWin[j][i][n] + manaCurveLose[j][i][n]);
-                cout << winRate << ",";
-            }
-            cout << "}," << endl;
-        }
-    }
-
-    int* totalManaCurve = new int[13];
-    for(int i = 0; i < 13; i ++){
-        totalManaCurve[i] = 0;
-    }
-    for(int i = 0; i < 160; i ++){
-        totalManaCurve[cardCosts[i]] ++;
-    }
-    for(int i = 0; i < 13; i ++){
-        cout << totalManaCurve[i] << ",";
-    }
-
-    cout << endl << "****card: totalcount****" << endl;
-    for(int i = 0; i < 160; i ++){
-        cout << "card:" << i + 1 << endl;
-        for(int n = 0; n < 31; n ++){
-            double winRate1 = (double)(cardTotalWin[0][i][n] + cardTotalWin[1][i][n]) / (double)(cardTotalWin[0][i][n] + cardTotalLose[0][i][n] + cardTotalWin[1][i][n] + cardTotalLose[1][i][n]);
-            cout << n << ":" << winRate1 << " ";
-        }
-        cout << endl;
-    }
-
-    cout << "cardWinrate={"; 
-    for(int i = 0; i < 160; i ++){
-        cout << "{"; 
-        for(int n = 0; n < 31; n ++){
-            double winRate1 = (double)(cardTotalWin[0][i][n]) / (double)(cardTotalWin[0][i][n] + cardTotalLose[0][i][n]);
-            cout << winRate1;
-            if(n != 30){
-                cout << ",";
-            }
-        }
-        cout << "}," << endl;
-    }
-    cout << "};" << endl;
-
-    cout << "cardWinrate={"; 
-    for(int i = 0; i < 160; i ++){
-        cout << "{"; 
-        for(int n = 0; n < 31; n ++){
-            double winRate1 = (double)(cardTotalWin[1][i][n]) / (double)(cardTotalWin[1][i][n] + cardTotalLose[1][i][n]);
-            cout << winRate1;
-            if(n != 30){
-                cout << ",";
-            }
-        }
-        cout << "}," << endl;
-    }
-    cout << "};" << endl;
-
-    cout << endl << "****card: typecount****" << endl;
-    for(int i = 0; i < 4; i ++){
-        cout << "Type:" << i  << endl;
-        for(int n = 0; n < 31; n ++){
-            double winRate = (double)(cardTypeWin[0][i][n] + cardTypeWin[1][i][n]) / (double)(cardTypeWin[0][i][n] + cardTypeLose[0][i][n] + cardTypeWin[1][i][n] + cardTypeLose[1][i][n]);
-            cout << n << ":" << winRate << ",";
-        }
-        cout << endl;
     }
 
     free(namelist);
