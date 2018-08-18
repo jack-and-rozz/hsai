@@ -148,7 +148,7 @@ int main(int argc,char *argv[]){
         //ディレクトリかファイルかを順番に識別
         for (n=0; n<parentDirElements; n+=1) {
             cout << "parent " << string(parentNameList[n] -> d_name) <<  endl;
-
+            stat((parentDir + string(parentNameList[n] -> d_name)).c_str(), &stat_buf);
             if ((stat_buf.st_mode & S_IFMT) == S_IFDIR){
                 // 再帰によりディレクトリ内を探索
                 string searchDir = parentDir + string(parentNameList[n] -> d_name) + "/00/", fileNames;
