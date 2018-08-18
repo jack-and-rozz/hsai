@@ -32,7 +32,7 @@ std::vector<std::string> split(std::string str, char del) {
 int main(int argc,char *argv[]){
     
     vector<string> fileNames;
-    int i, dirElements;
+    int i, dirElements, parentDirElements;
     string search_path;
 
     struct stat stat_buf;
@@ -137,16 +137,16 @@ int main(int argc,char *argv[]){
     string onlyWins = argv[2];
 
     // dirElements にはディレクトリ内の要素数が入る
-    dirElements = scandir(parentDir.c_str(), &parentNameList, NULL, NULL);
+    parentDirElements = scandir(parentDir.c_str(), &parentNameList, NULL, NULL);
 
-    if(dirElements == -1) {
+    if(parentDirElements == -1) {
         cout << "ERROR" <<  endl;
     }
 
     else{
 
         //ディレクトリかファイルかを順番に識別
-        for (i=0; i<dirElements; i+=1) {
+        for (i=0; i<parentDirElements; i+=1) {
 
             if ((stat_buf.st_mode & S_IFMT) == S_IFDIR){
                 // 再帰によりディレクトリ内を探索
