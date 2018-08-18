@@ -188,8 +188,9 @@ int main(int argc,char *argv[]){
                             while (getline(ifs, str))
                             {
                                 vector<string> result = split(str, ' ');
-                                if(result[0] == "-1" || result[0] == "-1"){
+                                if(result[0] == "-1" || result[1] == "-1"){
                                     errorFlag = true;
+                                    cout << "-1error" << matchID <<  endl;
                                     break;
                                 }
                                 if(result[0] == "1"){
