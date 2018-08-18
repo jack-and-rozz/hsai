@@ -10,8 +10,8 @@
 //8/4 use card value
 // 80 to 15! so strong
 
-//#define DEBUG
-//#define RANDOM_PICK
+#define DEBUG
+#define RANDOM_PICK
 //#define READ_EPOCH_FILE
 //#define TEKAGEN
 //#define DEBUG_PRINT
