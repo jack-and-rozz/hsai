@@ -50,23 +50,6 @@ int main(int argc,char *argv[]){
         }
     }
 
-    long*** cardTotalWin = new long**[2];
-    cardTotalWin[0] = new long*[160];
-    cardTotalWin[1] = new long*[160];
-    long*** cardTotalLose = new long**[2];
-    cardTotalLose[0] = new long*[160];
-    cardTotalLose[1] = new long*[160];
-    for(int i = 0; i < 160; i ++){
-        for(int n = 0; n < 2; n ++){
-            cardTotalWin[n][i] = new long[31];
-            cardTotalLose[n][i] = new long[31];
-            for(int j = 0; j < 31; j ++){
-                cardTotalWin[n][i][j] = 0;
-                cardTotalLose[n][i][j] = 0;
-            }
-        }
-    }
-
     long*** manaCurveWin = new long** [2];
     manaCurveWin[0] = new long*[13];
     manaCurveWin[1] = new long*[13];
@@ -171,9 +154,32 @@ int main(int argc,char *argv[]){
                     long** cardLose = new long*[2];
                     cardLose[0] = new long[160];
                     cardLose[1] = new long[160];
+                    long** noCardWin = new long*[2];
+                    noCardWin[0] = new long[160];
+                    noCardWin[1] = new long[160];
+                    long** noCardLose = new long*[2];
+                    noCardLose[0] = new long[160];
+                    noCardLose[1] = new long[160];
                     int* playerWin = new int[2];
                     playerWin[0] = 0;
                     playerWin[1] = 0;
+
+                    long*** cardTotalWin = new long**[2];
+                    cardTotalWin[0] = new long*[160];
+                    cardTotalWin[1] = new long*[160];
+                    long*** cardTotalLose = new long**[2];
+                    cardTotalLose[0] = new long*[160];
+                    cardTotalLose[1] = new long*[160];
+                    for(int i = 0; i < 160; i ++){
+                        for(int n = 0; n < 2; n ++){
+                            cardTotalWin[n][i] = new long[31];
+                            cardTotalLose[n][i] = new long[31];
+                            for(int j = 0; j < 31; j ++){
+                                cardTotalWin[n][i][j] = 0;
+                                cardTotalLose[n][i][j] = 0;
+                            }
+                        }
+                    }
 
                     for(int i = 0; i < 160; i ++){
                         cardWin[0][i] = 0;
@@ -348,10 +354,10 @@ int main(int argc,char *argv[]){
                     }
                     for(int n = 0; n < 2; n ++){
                         for(int i = 0; i < 160; i ++){
-                            double winRate = (double)playerWin[n] / (double)(playerWin[0] + playerWin[1]);
+                            double winRate = (double)cardTotalWin[n][i][0] / (double)(cardTotalWin[n][i][0] + cardTotalLose[n][i][0]); //カードを取らない場合の勝率
                             double currentCardValue = (double)cardWin[n][i] / (double)(cardWin[n][i] + cardLose[n][i]) - winRate;
                             double currentCount = (double)(cardWin[n][i] + cardLose[n][i]);
-                            if(currentCount == 0){
+                            if(currentCount == 0 || cardTotalWin[n][i][0] + cardTotalLose[n][i][0] == 0){
                                 continue;
                             }
                             cardValue[n][i] = (cardValue[n][i] * cardDataCount[n][i] + currentCardValue * currentCount) / (currentCount + cardDataCount[n][i]);
