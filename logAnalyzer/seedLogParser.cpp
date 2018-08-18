@@ -150,7 +150,7 @@ int main(int argc,char *argv[]){
 
             if ((stat_buf.st_mode & S_IFMT) == S_IFDIR){
                 // 再帰によりディレクトリ内を探索
-                string searchDir = parentDir + string(parentNameList[i] -> d_name) + "/", fileNames;
+                string searchDir = parentDir + string(parentNameList[i] -> d_name) + "/00/", fileNames;
 
                 // dirElements にはディレクトリ内の要素数が入る
                 dirElements = scandir(searchDir.c_str(), &namelist, NULL, NULL);
