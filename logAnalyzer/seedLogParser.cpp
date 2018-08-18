@@ -375,6 +375,14 @@ int main(int argc,char *argv[]){
         }
     }
 
+    for(int n = 0; n < 2; n ++){
+        cout << "{";
+        for(int i = 0; i < 160; i ++){
+            cout << cardValue[n][i] << ",";
+        }
+        cout << "}:" << endl;
+    }
+
     cout << "totalMatch:" << totalMatches << endl;
 
     free(namelist);
