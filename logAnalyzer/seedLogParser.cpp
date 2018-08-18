@@ -346,7 +346,10 @@ int main(int argc,char *argv[]){
                         for(int i = 0; i < 160; i ++){
                             double winRate = (double)playerWin[n] / (double)(playerWin[0] + playerWin[1]);
                             double currentCardValue = (double)cardWin[n][i] / (double)(cardWin[n][i] + cardLose[n][i]) - winRate;
-                            double currentCount = (double)(playerWin[0] + playerWin[1]);
+                            double currentCount = (double)(cardWin[n][i] + cardLose[n][i]);
+                            if(currentCount == 0){
+                                continue;
+                            }
                             cardValue[n][i] = (cardValue[n][i] * cardDataCount[n][i] + currentCardValue * currentCount) / (currentCount + cardDataCount[n][i]);
                             cardDataCount[n][i] += currentCount;
                         }
