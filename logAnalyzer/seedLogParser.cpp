@@ -32,7 +32,7 @@ std::vector<std::string> split(std::string str, char del) {
 int main(int argc,char *argv[]){
     
     vector<string> fileNames;
-    int i, dirElements, parentDirElements;
+    int i, n, dirElements, parentDirElements;
     string search_path;
 
     struct stat stat_buf;
@@ -146,7 +146,7 @@ int main(int argc,char *argv[]){
     else{
 
         //ディレクトリかファイルかを順番に識別
-        for (i=0; i<parentDirElements; i+=1) {
+        for (n=0; n<parentDirElements; n+=1) {
 
             if ((stat_buf.st_mode & S_IFMT) == S_IFDIR){
                 // 再帰によりディレクトリ内を探索
@@ -162,10 +162,10 @@ int main(int argc,char *argv[]){
                 else{
 
                     if(dirElements < 600){
-                        cout << string(parentNameList[i] -> d_name) << " has not enough log" <<  endl;
+                        cout << string(parentNameList[n] -> d_name) << " has not enough log" <<  endl;
                         continue;
                     }
-                    cout << "scan " << string(parentNameList[i] -> d_name) <<  endl;
+                    cout << "scan " << string(parentNameList[n] -> d_name) <<  endl;
 
                     //ディレクトリかファイルかを順番に識別
                     for (i=0; i<dirElements; i+=1) {
