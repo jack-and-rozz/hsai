@@ -29,6 +29,8 @@
 #include<fstream>
 #endif
 
+std::chrono::system_clock::time_point  start; // 型は auto で可
+
 double cardValues[160] = {0.000433529,-0.0037734,0.0028331,-0.00276243,0.00866409,0.00926344,0.029362,0.00190389,0.00771829,-0.0085139,0.00581557,-0.00253273,0.00805238,-0.0130036,0.00763868,-0.00624154,0.0089192,0.0130663,0.00519659,-0.00748882,0.00147536,-0.00139611,0.00551419,-0.00618836,0.00153689,0.000873843,0.00477187,0.000716053,0.00987119,-0.000576243,-0.00940427,0.00990177,0.00820396,-0.00255504,-0.0107639,0.000583625,0.0121412,-0.00073514,-0.00222392,-0.00431018,-0.00395841,-0.0183421,-0.00577225,0.0173889,-0.00909391,-0.00408303,0,0.00701637,0.0153841,0.00628554,0.0268336,0.00478309,0.0175815,0.00212425,-0.0197821,-0.00298329,-0.0164201,-0.0026735,-0.000324628,-0.00508684,0.00347833,-0.00198799,-0.00943521,0.00879462,0.0269608,0.0134584,0.0148968,0.0268221,0.0128387,-0.00183205,-0.0080639,0.00564646,0.0012535,-0.00336064,0.00918993,-0.0122763,0.000566452,-0.00734073,0.00065331,0.014409,0.00213692,0.00267892,-0.00134645,0.00707656,0.00295596,-0.0021922,0,0.00973341,-0.00481232,-0.00470274,0.00171294,-0.00863851,-3.54887e-05,-0.00495691,0.0114015,0.00413277,0.00348691,-0.00129351,0.00659267,-0.000100164,-0.0088968,-0.0131982,0.0147266,0.00447027,0.00678091,0.00324469,-0.0110531,-0.00837989,0.00685987,-0.029233,0.00775385,-0.00119425,-0.0179728,0.00456286,0.00147749,0.0126015,-0.00583768,-0.000873908,0.00163193,-0.00624224,0.00362457,0.00108682,-0.00808074,-0.0122458,-0.00222169,0.00195875,-0.00252306,0.00807992,0.00380313,-0.00646744,-0.00850858,-0.00819513,0.0121858,-0.00390422,0.00307388,-0.00422738,-0.00375989,-0.0140479,0.013371,-0.033683,0.0047868,-0.00601638,-0.0131875,0.00265587,0.00170743,-0.00901371,0.00466675,-0.000131648,-0.00772928,0.00934158,0.0150233,0.00444484,-0.0306787,-0.0165606,0.000195894,-0.0167981,0.00228041,0.00319721,-0.0113772,-0.0294801};
 
 double senteCardValues[160] = {0.679749,0.691726,0.684692,0.676797,0.678011,0.685816,0.693454,0.680791,0.698248,0.672015,0.692551,0.689212,0.697653,0.675585,0.699187,0.683507,0.696188,0.700302,0.701342,0.680849,0.698335,0.691031,0.704877,0.685955,0.690563,0.681492,0.680877,0.689951,0.710178,0.694985,0.680498,0.714942,0.704847,0.692006,0.678601,0.700127,0.714634,0.675222,0.683466,0.681956,0.677488,0.660999,0.672809,0.69439,0.680968,0.675728,0.66782,0.67676,0.680224,0.695613,0.709695,0.694484,0.677085,0.691328,0.64972,0.682168,0.654101,0.686285,0.69847,0.689698,0.702722,0.683072,0.668071,0.679924,0.690047,0.707049,0.715859,0.713718,0.710573,0.690488,0.682459,0.694256,0.68327,0.689875,0.704972,0.669166,0.700278,0.685778,0.691577,0.705609,0.699621,0.693747,0.673806,0.673041,0.694334,0.683229,0.685942,0.69834,0.681335,0.682789,0.673088,0.669918,0.68505,0.677778,0.686884,0.678143,0.692922,0.689787,0.694448,0.693377,0.678214,0.67846,0.694199,0.693774,0.695722,0.689978,0.663596,0.674949,0.701029,0.643926,0.692363,0.6852,0.655609,0.693577,0.683922,0.69754,0.685838,0.668903,0.683748,0.664969,0.690546,0.678268,0.668863,0.644229,0.683615,0.680907,0.680676,0.685833,0.687105,0.669419,0.676986,0.675788,0.686007,0.694467,0.688348,0.676137,0.681547,0.663655,0.672812,0.626745,0.666091,0.672917,0.656327,0.676768,0.680941,0.682239,0.683942,0.666765,0.688577,0.671848,0.682104,0.695294,0.629349,0.669854,0.68155,0.645673,0.688527,0.677812,0.670761,0.62976};
@@ -762,7 +764,7 @@ double getBoardScore(vector<Card*> myBoardCard, vector<Card*> enemyBoardCard, Pl
     int totalAttack = 0;
     int nextTotalAttack = 0;
     int lifeStealTotal = 0;
-    cerr << "myboard" << endl;
+    //cerr << "myboard" << endl;
     for(Card* card: myBoardCard){
         cerr << card->getID();
         nextTotalAttack += card->getAttack();
@@ -771,14 +773,14 @@ double getBoardScore(vector<Card*> myBoardCard, vector<Card*> enemyBoardCard, Pl
         }
     }
 
-    cerr << endl << "enemyboard" << endl;
+    //cerr << endl << "enemyboard" << endl;
     for(Card* card: enemyBoardCard){
         cerr << card->getID();
         if(card -> isDrain()){
             lifeStealTotal += card->getAttack();
         }
     }
-    cerr << endl;
+    //cerr << endl;
     if((!hasTaunt && totalAttack >= enemy->getHealth()) || enemy->getHealth() <= 0){
         lethalScore = 10000;
     }
@@ -841,7 +843,7 @@ double getBoardScore(vector<Card*> myBoardCard, vector<Card*> enemyBoardCard, Pl
     }
 
     int finalScore = myCardValueTotal - enemyCardValueTotal - leathalPenalty + lethalScore;
-    cerr << finalScore << endl;
+    //cerr << finalScore << endl;
 
     return finalScore;
 }
@@ -1115,12 +1117,22 @@ Game* simulateTrade(Card* attacker, Card* target){
         return new Game(myHandCardCopy, myBoardCardCopy, enemyBoardCardCopy, meCopy, opponentCopy, ssCopy.str(), manaLeft);
     }
 
+    double saikiUpperTime = 50;
+    std::chrono::system_clock::time_point saikiTime; // 型は auto で可
+
 
     SaikiResult* saikiPlayCard(int index, vector<Card*> currentPlay, int leftMana, int boardLeft, Game* current){
         SaikiResult* result = new SaikiResult(currentPlay, 0);
         vector<Card*> playCard;
-        
+
+        double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(saikiTime-start).count(); //処理に要した時間をミリ秒に変換
+        cerr << "time:" << elapsed << endl;
+        if(elapsed > saikiUpperTime){
+            result->score = -99999999;
+            return result;
+        }
         if(myHandCard.size() <= index){
+            saikiTime = std::chrono::system_clock::now();  // 計測終了時間
             Game* copyGame = current->getCopy();
             int score = 0;
             int totalDraw = 0;
@@ -1682,8 +1694,6 @@ void readModel(){
 }
 #endif
 
-
-
 int main(int argc,char *argv[])
 {
 
@@ -1761,7 +1771,6 @@ int main(int argc,char *argv[])
             }
         }
 
-        std::chrono::system_clock::time_point  start, end; // 型は auto で可
         start = std::chrono::system_clock::now(); // 計測開始時間
 
         // while draft phase
@@ -1890,7 +1899,7 @@ int main(int argc,char *argv[])
                 history.push_back(next);
                 scoreHistory.push_back(score);
                 current = next;
-                cerr << current->getCommands() << endl;
+                //cerr << current->getCommands() << endl;
             }
 
             // trace
@@ -1926,6 +1935,7 @@ int main(int argc,char *argv[])
                 cerr << current->getCommands() << endl;
             }
 
+            std::chrono::system_clock::time_point  end; // 型は auto で可
             end = std::chrono::system_clock::now();  // 計測終了時間
             double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count(); //処理に要した時間をミリ秒に変換
 
