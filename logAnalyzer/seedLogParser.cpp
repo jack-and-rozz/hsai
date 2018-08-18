@@ -98,6 +98,7 @@ int main(int argc,char *argv[]){
 
     int* cardCosts = new int[160];
     int* cardTypes = new int[160];
+    int totalMatches = 0;
 
     // parse cardlist
     std::ifstream ifs("cardlist.txt");
@@ -213,9 +214,12 @@ int main(int argc,char *argv[]){
                                     playerWin[1] ++;
                                 }
                             }
+
                             if(errorFlag){
                                 continue;
                             }
+
+                            totalMatches ++;
 
                             if(onlyWins == "wins"){
                                 continue;
@@ -364,6 +368,8 @@ int main(int argc,char *argv[]){
             cout << i + 1 << ":" << cardValue[n][i] << endl;
         }
     }
+
+    cout << "totalMatch:" << totalMatches << endl;
 
     free(namelist);
 }
