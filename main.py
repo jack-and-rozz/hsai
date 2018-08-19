@@ -114,6 +114,7 @@ class ExperimentManager(ManagerBase):
   def debug(self, model=None):
     if not model:
       model = self.create_model(self.config)
+      self.output_variables_as_text(model)
     batch = common.recDotDefaultDict()
     state = [[1.0 for _ in range(640)]]
     batch.state = state
