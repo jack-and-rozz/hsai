@@ -14,7 +14,7 @@ usage() {
     exit 1
 }
 
-if [ $# -lt 3 ];then
+if [ $# -lt 1 ];then
     usage;
 fi
 if [ ! -e $model_replay_path  ]; then
