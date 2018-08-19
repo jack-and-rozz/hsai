@@ -1582,7 +1582,7 @@ vector<vector<double> > getOneHot(){
     result.resize(1);
     result[0].resize(640);
     for(int i = 0; i < 160; i++){
-        /*if(currentDeck[i] == 0){
+        if(currentDeck[i] == 0){
             result[0][i * 4] = 1;
         }
         if(currentDeck[i] == 1){
@@ -1593,11 +1593,11 @@ vector<vector<double> > getOneHot(){
         }
         if(currentDeck[i] >= 3){
             result[0][i * 4 + 3] = 1;
-        }*/
-        result[0][i * 4] = 1;
+        }
+        /*result[0][i * 4] = 1;
         result[0][i * 4 + 1] = 1;
         result[0][i * 4 + 2] = 1;
-        result[0][i * 4 + 3] = 1;
+        result[0][i * 4 + 3] = 1;*/
     }
     return result;
 }
@@ -1857,7 +1857,7 @@ int main(int argc,char *argv[])
                 //score = cardWinrate[card->getCardNumber() - 1][currentDeck[card->getCardNumber() - 1] + 1] - cardWinrate[card->getCardNumber() - 1][currentDeck[card->getCardNumber() - 1]];
 #endif
 #ifdef READ_EPOCH_FILE
-                score = calcNN()[card->getCardNumber() - 1][0];
+                score = calcNN()[0][card->getCardNumber() - 1];
 #endif
                 /*if(card->getType() != 0){
                     score = -9999;
