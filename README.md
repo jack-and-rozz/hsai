@@ -16,6 +16,7 @@
 ```
 
 * To evaluate model (against noNWAgent)
+    * output is in ${model_dir}/evaluation/sente/{epoch_number}/sente_summary 
 ```
 ./simulator/evaluateAgent.sh ${model_dir} ${agent_path}
 

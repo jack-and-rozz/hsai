@@ -29,12 +29,12 @@ if [ ! -e $model_replay_path2  ]; then
    mkdir -p $model_replay_path2
 fi
 
-for i in `seq 0 1`
+for i in `seq 0 100`
 do
   echo "java -jar $jar_path $exe_path1 $exe_path2 $model_dir $model_replay_path1"
   java -jar $jar_path $exe_path1 $exe_path2 $model_dir $model_replay_path1
 done
-for i in `seq 0 1`
+for i in `seq 0 100`
 do
   echo "java -jar $jar_path $exe_path2 $exe_path1 $model_dir $model_replay_path2"
   java -jar $jar_path $exe_path2 $exe_path1 $model_dir $model_replay_path2
