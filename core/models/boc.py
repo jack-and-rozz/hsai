@@ -11,7 +11,8 @@ NUM_CANDIDATES = 3
 class BagOfCards(ModelBase):
   def __init__(self, sess, config):
     super().__init__(sess, config)
-    self.activation_f = getattr(tf.nn, config.activation)
+    self.hidden_activation = getattr(tf.nn, config.hidden_activation)
+    self.output_activation = getattr(tf.nn, config.output_activation)
     #self.activation_f = tf.nn.sigmoid
     self.hidden_size = config.hidden_size
     self.num_ff_layers = config.num_ff_layers
@@ -101,7 +102,8 @@ class BagOfCards(ModelBase):
 
     #self.loss = self._loss(target, filtered_q_values)
     with tf.name_scope('loss'):
-      self.loss = self._clipped_loss(self.target, self.q_values_of_selected_action)
+      self.loss = self._clipped_loss(self.target, 
+                                     self.q_values_of_selected_action)
       #self.loss = self._loss(self.target, self.q_values_of_selected_action)
     self.updates = self.get_updates(self.loss, self.global_step)
 
@@ -135,11 +137,13 @@ class BagOfCards(ModelBase):
       for i in range(self.num_ff_layers):
         with tf.variable_scope('Forward%d' % (i+1)) as scope:
           x = linear(x, output_size=self.hidden_size, 
-                     activation=self.activation_f, scope=scope)
+                     activation=self.hidden_activation, scope=scope)
           x = tf.nn.dropout(x, keep_prob=self.keep_prob)
       with tf.variable_scope('Output') as scope:
         q_values = linear(x, output_size=self.vocab_size.card,
-                          activation=self.activation_f, scope=scope)
+                          activation=self.output_activation,
+                          scope=scope)
+                          #activation=self.activation_f, scope=scope)
     return q_values
   
   def step(self, batch, step):
@@ -148,12 +152,14 @@ class BagOfCards(ModelBase):
     #self.debug_ops = [self.q_values_of_selected_action,  self.masked_next_q_values, self.expected_next_q_value, self.target, self.ph.reward]
     self.debug_ops = [
       self.q_values_of_selected_action,  
+      self.target,
+      self.loss
       #self.masked_next_q_values, 
-      self.expected_next_q_value, 
+      #self.expected_next_q_value, 
       #self.target, self.ph.reward,
     ]
     #self.debug_ops = []
-    if self.debug_ops:
+    if batch.is_training and self.debug_ops:
       for k, v in zip(self.debug_ops, self.sess.run(self.debug_ops, input_feed)):
         print ('Step %d' % step)
         print(k, v)
