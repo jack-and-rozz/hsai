@@ -10,9 +10,9 @@
 //8/4 use card value
 // 80 to 15! so strong
 
-#define DEBUG
-#define RANDOM_PICK
-//#define READ_EPOCH_FILE
+//#define DEBUG
+//#define RANDOM_PICK
+#define READ_EPOCH_FILE
 //#define TEKAGEN
 //#define DEBUG_PRINT
 
@@ -33,9 +33,8 @@ std::chrono::system_clock::time_point  start; // 型は auto で可
 
 double cardValues[160] = {0.000433529,-0.0037734,0.0028331,-0.00276243,0.00866409,0.00926344,0.029362,0.00190389,0.00771829,-0.0085139,0.00581557,-0.00253273,0.00805238,-0.0130036,0.00763868,-0.00624154,0.0089192,0.0130663,0.00519659,-0.00748882,0.00147536,-0.00139611,0.00551419,-0.00618836,0.00153689,0.000873843,0.00477187,0.000716053,0.00987119,-0.000576243,-0.00940427,0.00990177,0.00820396,-0.00255504,-0.0107639,0.000583625,0.0121412,-0.00073514,-0.00222392,-0.00431018,-0.00395841,-0.0183421,-0.00577225,0.0173889,-0.00909391,-0.00408303,0,0.00701637,0.0153841,0.00628554,0.0268336,0.00478309,0.0175815,0.00212425,-0.0197821,-0.00298329,-0.0164201,-0.0026735,-0.000324628,-0.00508684,0.00347833,-0.00198799,-0.00943521,0.00879462,0.0269608,0.0134584,0.0148968,0.0268221,0.0128387,-0.00183205,-0.0080639,0.00564646,0.0012535,-0.00336064,0.00918993,-0.0122763,0.000566452,-0.00734073,0.00065331,0.014409,0.00213692,0.00267892,-0.00134645,0.00707656,0.00295596,-0.0021922,0,0.00973341,-0.00481232,-0.00470274,0.00171294,-0.00863851,-3.54887e-05,-0.00495691,0.0114015,0.00413277,0.00348691,-0.00129351,0.00659267,-0.000100164,-0.0088968,-0.0131982,0.0147266,0.00447027,0.00678091,0.00324469,-0.0110531,-0.00837989,0.00685987,-0.029233,0.00775385,-0.00119425,-0.0179728,0.00456286,0.00147749,0.0126015,-0.00583768,-0.000873908,0.00163193,-0.00624224,0.00362457,0.00108682,-0.00808074,-0.0122458,-0.00222169,0.00195875,-0.00252306,0.00807992,0.00380313,-0.00646744,-0.00850858,-0.00819513,0.0121858,-0.00390422,0.00307388,-0.00422738,-0.00375989,-0.0140479,0.013371,-0.033683,0.0047868,-0.00601638,-0.0131875,0.00265587,0.00170743,-0.00901371,0.00466675,-0.000131648,-0.00772928,0.00934158,0.0150233,0.00444484,-0.0306787,-0.0165606,0.000195894,-0.0167981,0.00228041,0.00319721,-0.0113772,-0.0294801};
 
-double senteCardValues[160] = {0.679749,0.691726,0.684692,0.676797,0.678011,0.685816,0.693454,0.680791,0.698248,0.672015,0.692551,0.689212,0.697653,0.675585,0.699187,0.683507,0.696188,0.700302,0.701342,0.680849,0.698335,0.691031,0.704877,0.685955,0.690563,0.681492,0.680877,0.689951,0.710178,0.694985,0.680498,0.714942,0.704847,0.692006,0.678601,0.700127,0.714634,0.675222,0.683466,0.681956,0.677488,0.660999,0.672809,0.69439,0.680968,0.675728,0.66782,0.67676,0.680224,0.695613,0.709695,0.694484,0.677085,0.691328,0.64972,0.682168,0.654101,0.686285,0.69847,0.689698,0.702722,0.683072,0.668071,0.679924,0.690047,0.707049,0.715859,0.713718,0.710573,0.690488,0.682459,0.694256,0.68327,0.689875,0.704972,0.669166,0.700278,0.685778,0.691577,0.705609,0.699621,0.693747,0.673806,0.673041,0.694334,0.683229,0.685942,0.69834,0.681335,0.682789,0.673088,0.669918,0.68505,0.677778,0.686884,0.678143,0.692922,0.689787,0.694448,0.693377,0.678214,0.67846,0.694199,0.693774,0.695722,0.689978,0.663596,0.674949,0.701029,0.643926,0.692363,0.6852,0.655609,0.693577,0.683922,0.69754,0.685838,0.668903,0.683748,0.664969,0.690546,0.678268,0.668863,0.644229,0.683615,0.680907,0.680676,0.685833,0.687105,0.669419,0.676986,0.675788,0.686007,0.694467,0.688348,0.676137,0.681547,0.663655,0.672812,0.626745,0.666091,0.672917,0.656327,0.676768,0.680941,0.682239,0.683942,0.666765,0.688577,0.671848,0.682104,0.695294,0.629349,0.669854,0.68155,0.645673,0.688527,0.677812,0.670761,0.62976};
-double goteCardValues[160] = {0.324932,0.310195,0.32361,0.31388,0.329089,0.319904,0.326487,0.326661,0.306308,0.301797,0.311386,0.309649,0.302,0.294552,0.304768,0.301188,0.307778,0.30869,0.302202,0.303179,0.304031,0.300049,0.297588,0.302856,0.308168,0.324556,0.31769,0.316397,0.303659,0.307791,0.297309,0.292734,0.297585,0.299772,0.29485,0.295141,0.290831,0.324457,0.317005,0.305171,0.31214,0.285302,0.301892,0.310185,0.282861,0.307056,0.330308,0.341684,0.340121,0.311975,0.302338,0.312112,0.338973,0.31061,0.283439,0.304621,0.285296,0.301545,0.297202,0.295982,0.294507,0.307378,0.315704,0.330407,0.326226,0.300285,0.295337,0.301016,0.30146,0.307574,0.303142,0.30024,0.309682,0.301574,0.294089,0.296746,0.295483,0.29476,0.303724,0.303085,0.300574,0.308459,0.330828,0.339227,0.310753,0.308482,0.320362,0.303956,0.315656,0.313002,0.331308,0.301165,0.318196,0.315777,0.323843,0.331811,0.309593,0.311335,0.313582,0.305482,0.308204,0.288958,0.312885,0.306925,0.307101,0.310262,0.299724,0.304037,0.301834,0.281293,0.306757,0.309483,0.297542,0.305925,0.319657,0.310105,0.296142,0.335945,0.315506,0.309563,0.311272,0.321172,0.294747,0.305062,0.311637,0.323183,0.308233,0.31695,0.318193,0.314535,0.297972,0.292901,0.319285,0.298887,0.314681,0.317826,0.3128,0.298467,0.339221,0.269629,0.341709,0.320901,0.290292,0.33089,0.322563,0.309888,0.323461,0.341386,0.302065,0.336116,0.333807,0.305244,0.276673,0.28719,0.321771,0.286102,0.309809,0.331543,0.315731,0.272555};
-
+double senteCardValues[160] = {0.00522914,0.00649074,0.0373472,-0.0227351,-0.00615287,0.0583284,0.117264,0.00518128,-0.0229118,0.0199622,0.016954,0.0367072,-3.47338e-05,-0.0239185,0.0342298,0.00916495,0.0333294,0.0585944,-0.015473,-0.0210462,0.00870821,0.00380487,0.00702071,-0.00884353,0.0367473,0.0364663,0.0318212,0.0166431,0.0555974,0.00806699,-0.0242122,0.0638749,0.0276655,0.0257424,0.00435631,0.0218679,0.0536554,-0.0172122,-0.0176253,-0.00827046,0.0125336,-0.0425849,-0.00745449,-0.0444275,0.00801553,0.0149138,0.0152714,0.112694,0.0736462,0.0546047,0.087719,0.0399407,0.0484114,0.00566218,-0.0620186,-0.0223839,-0.030543,-0.000530424,0.0104515,-0.024526,0.0891363,-0.0177142,-0.0282858,-0.0109838,0.10237,0.0549253,0.0388632,0.106084,0.0579393,0.00547221,0.0160756,-0.00560487,-0.000281269,-0.00367716,0.0479686,-0.043348,0.0239022,0.0156017,0.0342234,0.0675693,-0.00216348,0.0144876,-0.0211105,0.0384108,0.050097,-0.0108636,0.0130793,0.0367385,0.0203271,0.0244206,0.0256851,-0.0378035,-0.0102143,-0.00291633,-0.0127916,0.0152501,0.011471,-0.0159928,0.0275439,-0.0158701,-0.00819335,0.00643682,-0.00720459,0.0150764,0.066655,0.0771835,-0.0403507,-0.00771895,0.0473175,-0.0580764,0.0544935,-0.00267719,-0.049929,-0.0176468,0.0591496,-0.0151179,-0.0818333,0.0477531,-0.0583297,-0.0321885,0.0361966,-0.0132881,-0.0260448,-0.0562397,0.00154604,-0.0317302,0.00139487,0.0555814,0.0239356,-0.0355977,-0.0438997,-0.0354203,0.0333321,-0.000637868,0.040769,-0.0166353,0.0168322,-0.0338096,0.00584953,-0.0601254,-0.0140267,0.000416507,-0.0195359,0.0231085,0.040729,-0.0332866,0.0730047,0.0234788,-0.000336922,0.0467499,0.0917952,-0.0114921,-0.0741875,-0.00545544,0.0344129,-0.0618768,-0.0208459,0.0276144,-0.0317566,-0.0677456};
+double goteCardValues[160] = {0.058102,0.0258042,0.0706185,0.0099431,0.00904855,0.0591329,0.125346,0.0218466,0.020942,-0.015102,0.0741874,0.0464433,0.017383,-0.0199364,0.00431621,-0.00986173,0.00546549,0.024209,-0.00782556,-0.00957748,-0.000463608,0.0294612,-0.0142696,-0.0256717,0.020775,0.0584086,0.0350105,0.0120206,0.0363414,-0.00952028,-0.0109271,0.0728354,0.0129478,0.000485747,-0.0118241,0.00750278,0.0286469,0.0280213,-0.0508536,-0.0117841,-0.00596415,-0.038574,-0.0171501,0.0307178,-0.0267872,0.00771515,-0.00802544,0.128753,0.0791327,-0.0027949,0.0935145,0.0037073,0.0538065,0.0727279,-0.0338961,-0.0136646,-0.030621,-0.0168686,0.0344697,-0.0184215,0.0332275,-0.0177833,-0.0147347,0.0239804,0.0790134,-0.0220797,0.0484203,0.120965,-0.0389621,-0.0041262,0.0185518,-0.0233834,0.00837519,0.0151833,-0.0103635,-0.0222291,0.0225975,-0.0163072,0.00631932,0.034658,0.0248979,0.0338133,-0.0118245,0.00102474,0.0759433,0.0152856,0.0123044,0.0578618,0.00247702,-0.00230104,0.0011328,-0.0305029,-0.0111287,0.00527088,0.0401635,0.0109352,-0.00980729,0.00650463,0.0486083,0.0311611,-0.0171294,-0.023658,0.0058718,0.0126698,0.0167936,0.046664,-0.00408254,-0.0160383,-0.0010001,-0.0574716,0.0641651,0.00498499,-0.0181988,0.0598401,0.0132905,0.0472286,0.01458,-0.0185259,0.0953192,-0.0105867,-0.00523497,-0.00779782,-0.0409266,-0.0401784,0.0130724,0.00367043,0.0282207,0.0195838,-0.000376817,-0.00276598,-0.019775,-0.0356905,-0.014633,-0.0264432,0.0233628,0.0137823,-0.00883867,-0.0322892,-0.0208647,-0.0524126,0.102244,-0.00579516,-0.00289143,0.0483592,0.0424053,-0.0255751,0.0560565,0.0456625,-0.0542025,0.0401625,0.0659664,0.0241994,-0.045094,-0.0450714,0.0499352,-0.0355589,0.0385908,0.0301813,-0.0194965,-0.0706499};
 
 double senteCardWinrate[160][31]={{0.690717,0.681791,0.679938,0.665513,0.679775,0.666667,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
 {0.688243,0.690559,0.691038,0.714754,0.621212,0.8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
@@ -396,20 +395,29 @@ double goteManaCurve[13][31]={{0.292966,0.310785,0.328464,0.345464,0.36502,0.400
 
 using namespace std;
 
-double** mulMatrix(double** a,double** b, int r1, int c1, int r2, int c2)
+vector<vector<double> > mulMatrix(vector<vector<double> > a,vector<vector<double> > b)
 {
+    int r1 = a.size();
+    int c1 = a[0].size();
+    int r2 = b.size();
+    int c2 = b[0].size();
+
+    cerr << c1 << ":" << r1 << ":" << c2 << ":" << r2 << endl;
+
     // If column of first matrix in not equal to row of second matrix,
     // ask the user to enter the size of matrix again.
     while (c1!=r2)
     {
         cerr << "Error! column of first matrix not equal to row of second.";
+        cin >> c1;
     }
 
     cerr << "1" << endl;
 
-    double** result = new double*[r1];
+    vector<vector<double> > result;
+    result.resize(r1);
     for(int i = 0; i < r1; i++){
-        result[i] = new double[c2];
+        result[i].resize(c2);
     }
 
     cerr << "2" << endl;
@@ -429,10 +437,10 @@ double** mulMatrix(double** a,double** b, int r1, int c1, int r2, int c2)
         for(int j = 0; j < c2; j++){
             for(int k = 0; k < c1; k++)
             {
-                /*cerr << i << ":" << j << ":" << k << endl;
-                cerr << result[i][j] << endl;
-                cerr << a[i][k] << endl;
-                cerr << b[k][j] << endl;*/
+                //cerr << i << ":" << j << ":" << k << endl;
+                /*cerr << result[j][i] << endl;
+                cerr << a[k][i] << endl;
+                cerr << b[j][k] << endl;*/
                 result[i][j] += a[i][k] * b[k][j];
             }
         }
@@ -578,6 +586,9 @@ public:
 
     // hyokati calculation
     int calcBasicValue(){
+        if(defense <= 0){
+            return 0;
+        }
         int base = attack + defense;
         if(isWard()){
             base += attack;
@@ -714,25 +725,6 @@ public:
 };
 
 
-int getTradeScore(Card* me, Card* target){
-    int dealDamage = min(me->getAttack(), target->getDefense());
-    if( target->isWard()){
-        dealDamage = 1 + target->getAttack();
-    }
-    int takeDamage = min(target->getAttack(), me->getDefense());
-    if( me->isWard()){
-        takeDamage = 1;
-    }
-    int score = dealDamage - takeDamage;
-    if(me->getAttack() >= target->getDefense() || (me->isLethal() && dealDamage > 0)){
-        score += target->getDefense() + target->getAttack();
-    }
-    if(target->getAttack() >= me->getDefense() || (target->isLethal() && takeDamage > 0)){
-        score -= me->getDefense() + me->getAttack();
-    }
-    return score;
-}
-
 int executeFight(Card* attacker, Card* target){
     attacker->doAction();
     if(attacker->isLethal()){
@@ -747,6 +739,32 @@ int executeFight(Card* attacker, Card* target){
     else{
         attacker->takeDamage(target->getAttack());
     }
+}
+
+
+int getTradeScore(Card* me, Card* target){
+    int initialScore = me->calcBasicValue() - target->calcBasicValue();
+    Card* meCopy = me->getCardCopy();
+    Card* targetCopy = target->getCardCopy();
+    executeFight(meCopy, targetCopy);
+    int afterScore = meCopy->calcBasicValue() - targetCopy->calcBasicValue();
+    return afterScore - initialScore;
+    /*int dealDamage = min(me->getAttack(), target->getDefense());
+    if( target->isWard()){
+        dealDamage = 1 + target->getAttack();
+    }
+    int takeDamage = min(target->getAttack(), me->getDefense());
+    if( me->isWard()){
+        takeDamage = 1;
+    }
+    int score = dealDamage - takeDamage;
+    if(me->getAttack() >= target->getDefense() || (me->isLethal() && dealDamage > 0)){
+        score += target->getDefense() + target->getAttack();
+    }
+    if(target->getAttack() >= me->getDefense() || (target->isLethal() && takeDamage > 0)){
+        score -= me->getDefense() + me->getAttack();
+    }
+    return score;*/
 }
 
 int LEATHAL_DANGER_VALUE = 7;
@@ -812,7 +830,7 @@ double getBoardScore(vector<Card*> myBoardCard, vector<Card*> enemyBoardCard, Pl
             basicValue += me->getMana();
         }*/
         if(minTradeScore != -999){
-            myCardValueTotal += max(basicValue, minTradeScore);
+            myCardValueTotal += max(basicValue, minTradeScore + basicValue);
         }
         else{
             myCardValueTotal += basicValue;
@@ -834,7 +852,7 @@ double getBoardScore(vector<Card*> myBoardCard, vector<Card*> enemyBoardCard, Pl
             basicValue += me->getMana();
         }*/
         enemyAttackTotal += enemyCard->getAttack();
-        enemyCardValueTotal += max(basicValue, maxTradeScore);
+        enemyCardValueTotal += max(basicValue, maxTradeScore + basicValue);
     }
     // avoid enemy leathal
     int leathalPenalty = 0;
@@ -1504,10 +1522,12 @@ int catdCostCounts[13] = {7,12,33,28,30,18,15,7,5,3,0,0,2};
 int* currentDeck = new int[160];
 int pickedCard = 0;
 int HIDDEN_SIZE = 100;
-double*** w;
-double** b;
+vector<vector<vector<double> > > w;
+vector<vector<double> > b;
 
-double ** relu(double** input, int r, int c){
+vector<vector<double> > relu(vector<vector<double> > input){
+    int r = input.size();
+    int c = input[0].size();
     for(int i = 0; i < r; i ++){
         for(int n = 0; n < c; n ++){
             if(input[i][n] < 0){
@@ -1518,7 +1538,9 @@ double ** relu(double** input, int r, int c){
     return input;
 }
 
-double ** sigmoid(double** input, int r, int c){
+vector<vector<double> > sigmoid(vector<vector<double> > input){
+    int r = input.size();
+    int c = input[0].size();
     for(int i = 0; i < r; i ++){
         for(int n = 0; n < c; n ++){
             input[i][n] = 1/(1 + exp(-input[i][n]));
@@ -1527,10 +1549,12 @@ double ** sigmoid(double** input, int r, int c){
     return input;
 }
 
-double ** tanh(double** input, int r, int c){
+vector<vector<double> > tanh(vector<vector<double> > input){
+    int r = input.size();
+    int c = input[0].size();
     for(int i = 0; i < r; i ++){
         for(int n = 0; n < c; n ++){
-            input[i][n] = 1 - exp(-2 * input[i][n]) / (1 + exp(-2 * input[i][n]));
+            input[i][n] = (1 - exp(-2 * input[i][n])) / (1 + exp(-2 * input[i][n]));
         }
     }
     return input;
@@ -1538,68 +1562,74 @@ double ** tanh(double** input, int r, int c){
 
 string activation;
 
-double ** applyActivation(double** input, int r, int c){
+vector<vector<double> > applyActivation(vector<vector<double> > input){
     cerr << activation << endl;
     if(activation == "\"relu\""){
-        return relu(input, r, c);
+        return relu(input);
     }
     if(activation == "\"tanh\""){
-        return tanh(input, r, c);
+        return tanh(input);
     }
     if(activation == "\"sigmoid\""){
-        return sigmoid(input, r, c);
+        return sigmoid(input);
     }
     //exit(1);
 }
 
-double** getOneHot(){
-    double ** result = new double* [640];
-    for(int i = 0; i < 640; i++){
-        result[i] = new double[1];
-        result[i][0] = 0;
-    }
+vector<vector<double> > getOneHot(){
+
+    vector<vector<double> > result;
+    result.resize(1);
+    result[0].resize(640);
     for(int i = 0; i < 160; i++){
-        if(currentDeck[i] == 0){
-            result[i * 4][0] = 1;
+        /*if(currentDeck[i] == 0){
+            result[0][i * 4] = 1;
         }
         if(currentDeck[i] == 1){
-            result[i * 4 + 1][0] = 1;
+            result[0][i * 4 + 1] = 1;
         }
         if(currentDeck[i] == 2){
-            result[i * 4 + 2][0] = 1;
+            result[0][i * 4 + 2] = 1;
         }
         if(currentDeck[i] >= 3){
-            result[i * 4 + 3][0] = 1;
-        }
+            result[0][i * 4 + 3] = 1;
+        }*/
+        result[0][i * 4] = 1;
+        result[0][i * 4 + 1] = 1;
+        result[0][i * 4 + 2] = 1;
+        result[0][i * 4 + 3] = 1;
     }
     return result;
 }
 
-double** calcNN(){
-    double** inputVector = getOneHot();
+vector<vector<double> > calcNN(){
+    vector<vector<double> > inputVector = getOneHot();
 
     // calc matrix 1
     cerr << "layer1" << endl;
-    double** x1 = mulMatrix(w[0], inputVector, 100, 640, 640, 1);
+    vector<vector<double> > x1 = mulMatrix(inputVector, w[0]);
     cerr << "endmul" << endl;
     for(int i = 0; i < HIDDEN_SIZE; i ++){
-        x1[i][0] += b[0][i];
+        x1[0][i] += b[0][i];
     }
-    applyActivation(x1, HIDDEN_SIZE, 1);
+    //applyActivation(x1);
+    x1 = relu(x1);
     // calc matrix 2
     cerr << "layer2" << endl;
-    double** x2 = mulMatrix(w[1], x1, 100, 100, 100, 1);
+    vector<vector<double> > x2 = mulMatrix(x1, w[1]);
     for(int i = 0; i < HIDDEN_SIZE; i ++){
-        x2[i][0] += b[1][i];
+        x2[0][i] += b[1][i];
     }
-    applyActivation(x2, HIDDEN_SIZE, 1);
+    //applyActivation(x2);
+    x2 = relu(x2);
     // calc matrix 3
     cerr << "layer3" << endl;
-    double** x3 = mulMatrix(w[2], x2, 160, 100, 100, 1);
+    vector<vector<double> > x3 = mulMatrix(x2, w[2]);
     for(int i = 0; i < 160; i ++){
-        x3[i][0] += b[2][i];
+        x3[0][i] += b[2][i];
     }
-    applyActivation(x3, 160, 1);
+    x3 = tanh(x3);
+    //applyActivation(x3);
     return x3;
 }
 
@@ -1607,6 +1637,7 @@ string modelDir;
 string logFileName;
 string logDirName;
 string confDir;
+int hidden_size = 0;
 
 #ifdef READ_EPOCH_FILE
 void readModel(){
@@ -1619,76 +1650,78 @@ void readModel(){
         return;
     }
     while (getline(ifs, str)){
+        str.erase(remove(str.begin(), str.end(),' '), str.end());
         if(str.substr(0, 10) == "activation"){
-            activation = str.substr(13);
+            activation = str.substr(11);
+        }
+        if(str.substr(0, 10) == "activation"){
+            activation = str.substr(11);
         }
     }
 
     // load bias
-    b = new double*[3];
     for(int n = 0; n < 3; n ++){
         cerr << "read bias file" << n << endl;
         string fileName;
         int size;
         if(n == 0){
             fileName = modelDir + "/Inference-Forward1-biases.csv";
-            size = 100;
         } else if(n == 1){
             fileName = modelDir + "/Inference-Forward2-biases.csv";
-            size = 100;
         } else if(n == 2){
             fileName = modelDir + "/Inference-Output-biases.csv";
-            size = 160;
         }
         std::ifstream ifs(fileName);
         if (ifs.fail()){
             std::cerr << "失敗" << std::endl;
             return;
         }
-        b[n] = new double[size];
-        int i = 0;
+        //b[n] = new double[size];
+        vector<double> oneLine;
         while (getline(ifs, str)){
-            b[n][i] = std::atof(str.c_str());
-            i ++;
+            oneLine.push_back(std::atof(str.c_str()));
         }
+        b.push_back(oneLine);
     }
 
     // load weight
-    w = new double**[3];
     for(int n = 0; n < 3; n ++){
         cerr << "read weight file" << n << endl;
         string fileName;
         int size1, size2;
         if(n == 0){
             fileName = modelDir  + "/Inference-Forward1-weights.csv";
-            size1 = 100;
-            size2 = 640;
         } else if(n == 1){
             fileName = modelDir  + "/Inference-Forward2-weights.csv";
-            size1 = 100;
-            size2 = 100;
         } else if(n == 2){
             fileName = modelDir  + "/Inference-Output-weights.csv";
-            size1 = 160;
-            size2 = 100;
         }
         std::ifstream ifs(fileName);
         if (ifs.fail()){
             std::cerr << "失敗" << std::endl;
             return;
         }
-        w[n] = new double*[size1];
-        for(int i = 0; i < size1; i ++){
-            w[n][i] = new double[size2];
-        }
-        int i = 0;
+        vector< vector <double> > weight;
         while (getline(ifs, str)){
             vector<string> result = split(str, ' ');
-            for(int j = 0; j < size1; j ++){
-                w[n][j][i] = std::atof(result[j].c_str());
+            vector<double> oneLine;
+            for(int j = 0; j < result.size(); j ++){
+                oneLine.push_back(std::atof(result[j].c_str()));
             }
-            i ++;
+            weight.push_back(oneLine);
         }
+        w.push_back(weight);
+        
+        /*vector< vector <double> > weight;
+        while (getline(ifs, str)){
+            vector<string> result = split(str, ' ');
+            weight.resize(result.size());
+            for(int j = 0; j < result.size(); j ++){
+                weight[j].push_back(std::atof(result[j].c_str()));
+            }
+        }
+        w.push_back(weight);*/
+        
     }
     cerr << "read weight done" << endl;
 }
@@ -1708,9 +1741,9 @@ int main(int argc,char *argv[])
     for(int i = 0; i < 160; i ++){
         currentDeck[i] = 1;
     }
-    double** nn = calcNN();
+    vector<vector<double> > nn = calcNN();
     for(int i = 0; i < 160; i ++){
-        cerr << nn[i][0] << endl;
+        cerr << nn[0][i] << endl;
     }
 #endif
 
@@ -1813,7 +1846,14 @@ int main(int argc,char *argv[])
 #endif*/
                 double score = idealManaCurve[card->getCost()] - expectedManaCurve[card->getCost()];
 #ifndef TEKAGEN
+
                 score += cardValues[card->getCardNumber() - 1] * 200;
+                /*if(me->getDeck() != opponent->getDeck()){
+                    score += senteCardValues[card->getCardNumber() - 1] * 200;
+                }
+                else{
+                    score += goteCardValues[card->getCardNumber() - 1] * 200;
+                }*/
                 //score = cardWinrate[card->getCardNumber() - 1][currentDeck[card->getCardNumber() - 1] + 1] - cardWinrate[card->getCardNumber() - 1][currentDeck[card->getCardNumber() - 1]];
 #endif
 #ifdef READ_EPOCH_FILE
