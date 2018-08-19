@@ -104,36 +104,39 @@ int main(int argc,char *argv[]){
     playerWin[0] = 0;
     playerWin[1] = 0;
 
-    // parse cardlist
-    std::ifstream ifs("cardlist.txt");
-    std::string str;
-    if (ifs.fail())
-    {
-        std::cerr << "失敗" << std::endl;
-        return -1;
-    }
-    int id = 0;
-    while (getline(ifs, str))
-    {
-        vector<string> result = split(str, ';');
-        cardCosts[id] = std::atoi(result[3].c_str());
-        if(result[2] == " creature "){
-            cardTypes[id] = 0;
-        }
-        if(result[2] == " itemGreen "){
-            cardTypes[id] = 1;
-        }
-        if(result[2] == " itemRed "){
-            cardTypes[id] = 2;
-        }
-        if(result[2] == " itemBlue "){
-            cardTypes[id] = 3;
-        }
-        id ++;
-    }
-
     string searchDir = argv[1];
     string onlyWins = argv[2];
+    std::string str;
+    if(onlyWins != "wins"){
+
+        // parse cardlist
+        std::ifstream ifs("cardlist.txt");
+        
+        if (ifs.fail())
+        {
+            std::cerr << "失敗" << std::endl;
+            return -1;
+        }
+        int id = 0;
+        while (getline(ifs, str))
+        {
+            vector<string> result = split(str, ';');
+            cardCosts[id] = std::atoi(result[3].c_str());
+            if(result[2] == " creature "){
+                cardTypes[id] = 0;
+            }
+            if(result[2] == " itemGreen "){
+                cardTypes[id] = 1;
+            }
+            if(result[2] == " itemRed "){
+                cardTypes[id] = 2;
+            }
+            if(result[2] == " itemBlue "){
+                cardTypes[id] = 3;
+            }
+            id ++;
+        }
+    }
     
 
     // dirElements にはディレクトリ内の要素数が入る

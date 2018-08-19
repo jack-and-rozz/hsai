@@ -14,3 +14,10 @@
 ```
 ./simulator/evaluateAgent.sh trained_models/tmp ./tmplog
 ```
+
+* To evaluate model (against noNWAgent)
+```
+./simulator/evaluateAgent.sh ${model_dir} ${agent_path}
+
+./simulator/evaluateAgent.sh trained_models/tmp log_test simulator/simulator
+```

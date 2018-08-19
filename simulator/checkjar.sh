@@ -6,7 +6,7 @@ exe_path2=$3
 jar_path=$simulator_dir/locam.jar
 
 model_dir=$1
-model_replay_path=$model_dir/replays
+model_replay_path=$model_dir/evaluation
 
 usage() {
     echo "Usage:$0 model_dir agent1_path agent2_path"
