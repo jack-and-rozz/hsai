@@ -32,12 +32,12 @@ fi
 for i in `seq 0 100`
 do
   echo "java -jar $jar_path $exe_path1 $exe_path2 $model_dir $model_replay_path1"
-  java -jar $jar_path $exe_path1 $exe_path2 $model_dir $model_replay_path1
+  java -jar $jar_path $exe_path1 $exe_path2 $model_dir $model_replay_path1 -1 random
 done
 for i in `seq 0 100`
 do
   echo "java -jar $jar_path $exe_path2 $exe_path1 $model_dir $model_replay_path2"
-  java -jar $jar_path $exe_path2 $exe_path1 $model_dir $model_replay_path2
+  java -jar $jar_path $exe_path2 $exe_path1 $model_dir $model_replay_path2 -1 random
 done
 
 for filepath in $model_replay_path1/*; do
