@@ -117,6 +117,16 @@ class recDotDefaultDict(collections.defaultdict):
   def __init__(self, _=None):
     super(recDotDefaultDict, self).__init__(recDotDefaultDict)
 
+def flatten_recdict(d):
+  res = dotDict()
+  for k in d:
+    if isinstance(d[k], dict):
+      subtrees = flatten_recdict(d[k])
+      for kk, v in subtrees.items():
+        res['%s.%s' % (k, kk)] = v
+    else:
+      res[k] = d[k]
+  return res
 
 def flatten_batch(batch):
   '''

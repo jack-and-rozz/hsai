@@ -16,7 +16,9 @@ class ExperimentManager(ManagerBase):
     super().__init__(args, sess)
     self.model = None
     #self.dataset = HSReplayDataset(self.replays_path, self.config.dataset)
-    dataset_type = getattr(core.dataset, self.config.dataset.dataset_type)
+    #dataset_type = getattr(core.dataset, self.config.dataset.dataset_type)
+    dataset_type = getattr(core.dataset,
+                           self.config.model_type + '_HSReplayDataset')
     self.dataset = dataset_type(self.replays_path, self.config.dataset)
 
   @common.timewatch()
@@ -99,6 +101,16 @@ class ExperimentManager(ManagerBase):
 
       model.add_epoch()
 
+  def batch_check(self, model=None):
+    batches = self.dataset.get_batches(
+      self.config.batch_size, 0, is_training=True)
+    for b in batches:
+      b = common.flatten_recdict(b)
+      for k in b:
+        if isinstance(b[k], list):
+          print(k, np.array(b[k]).shape)
+      exit(1)
+    
   def debug(self, model=None):
     if not model:
       model = self.create_model(self.config)

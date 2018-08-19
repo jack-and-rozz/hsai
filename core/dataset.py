@@ -4,6 +4,7 @@ import subprocess, os, re, time, sys, random, copy
 import glob
 import numpy as np
 from pprint import pprint
+from core.models import *
 
 WIN_REWARD = 1 
 LOSE_REWARD = -1
@@ -51,7 +52,7 @@ def read_log(fpath, max_num_card, num_next_candidates_samples):
   data[-1].is_end_state = True
   return data
 
-class HSReplayDataset(object):
+class HSReplayDatasetBase(object):
   def __init__(self, dataset_path, config):
     self.dataset_path = dataset_path
     self.iterations_per_epoch = config.iterations_per_epoch
@@ -74,32 +75,25 @@ class HSReplayDataset(object):
       sys.stderr.write('No enough replays. (%d/%d)\n' % (n_replays, self.memory_size))
       time.sleep(1)
     replays = replays[:self.memory_size // 60 + 1]
-    data = recDotDefaultDict()
+    data = []
     for i, fpath in enumerate(replays):
       if i % (len(replays) // 10) == 0:
         sys.stderr.write('Reading logs from \'%s\' ... (%d/%d)\n' % (replay_path, i, len(replays)))
-      self.add_replay(data, fpath)
+      data += self.add_replay(fpath)
+      #self.add_replay(data, fpath)
     return data
 
   def get_batches(self, batch_size, current_epoch, 
                   random_sample=True, is_training=True):
     dataset_path = os.path.join(self.dataset_path, '%03d' % current_epoch)
-    data = self.read_data(dataset_path) 
-    # data[replay_id] = [p1_episode, p2_episode]
-    # episode = [data_turn0, data_turn1, ...]
-
-    flat_data = []
-    for d in data.values():
-      for episode in d: 
-        flat_data += episode
-
+    data = self.read_data(dataset_path)
     for i in range(self.iterations_per_epoch):
       batch = recDotDefaultDict()
       batch.is_training = is_training 
       if random_sample:
-        sampled_data = random.sample(flat_data, batch_size)
-        for d in sampled_data:
-          batching_dicts(batch, d)
+        replays = random.sample(data, batch_size)
+        for x in replays:
+          batching_dicts(batch, x)
         yield batch
 
   def read_log(self, fpath):
@@ -125,7 +119,13 @@ class HSReplayDataset(object):
     p2log[-1].reward = WIN_REWARD if result[1] == 1 else LOSE_REWARD
     return fkey, p1log, p2log
 
-  def add_replay(self, data, fpath):
+  
+  def add_replay(self, fpath):
+    raise NotImplementedError
+
+
+class NStepTD_HSReplayDataset(HSReplayDatasetBase):
+  def add_replay(self, fpath):
     log = self.read_log(fpath)
     if not log:
       return 
@@ -136,14 +136,29 @@ class HSReplayDataset(object):
     for t in range(T):
       p1log[t].reward = (self.td_gamma ** (T - t - 1)) * p1log[-1].reward
       p2log[t].reward = (self.td_gamma ** (T - t - 1)) * p2log[-1].reward
-    data[fkey] = [p1log, p2log]
+    data = p1log + p2log
     return data
 
-class SequencialHSReplayDataset(object):
-  def __init__(self, dataset_path, config):
-    super().__init__(self, dataset_path, config)
 
-  def add_replay(self, data, fpath):
-    fkey, p1log, p2log = self.read_log(fpath)
-    data[fkey] = [p1log, p2log]
+class TDlambda_HSReplayDataset(HSReplayDatasetBase):
+  def add_replay(self, fpath):
+    log = self.read_log(fpath)
+    if not log:
+      return 
+    fkey, p1log, p2log = log
+    p1log_tensors = recDotDefaultDict()
+    for d in p1log:
+      batching_dicts(p1log_tensors, d)
+    p2log_tensors = recDotDefaultDict()
+    for d in p1log:
+      batching_dicts(p2log_tensors, d)
+      
+    # Propagate rewards from the last state for N-step TD.
+    # T = len(p1log)
+    # for t in range(T):
+    #   p1log[t].reward = (self.td_gamma ** (T - t - 1)) * p1log[-1].reward
+    #   p2log[t].reward = (self.td_gamma ** (T - t - 1)) * p2log[-1].reward
+    data = [p1log_tensors, p2log_tensors]
     return data
+
+
