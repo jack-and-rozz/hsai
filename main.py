@@ -99,7 +99,7 @@ class ExperimentManager(ManagerBase):
 
       model.add_epoch()
 
-  def test(self, model=None):
+  def debug(self, model=None):
     if not model:
       model = self.create_model(self.config)
     batch = common.recDotDefaultDict()
