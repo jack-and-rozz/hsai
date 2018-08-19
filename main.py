@@ -1,5 +1,6 @@
 # coding: utf-8
 import sys, os, random, copy, socket, time, re, argparse
+import subprocess
 from collections import OrderedDict
 from pprint import pprint
 import core.dataset
@@ -73,7 +74,27 @@ class ExperimentManager(ManagerBase):
         target_path = self.checkpoints_path + "/%s.%s" % (BEST_CHECKPOINT_NAME, sfx)
         if os.path.exists(source_path):
           cmd = "cp %s %s" % (source_path, target_path)
-          os.system(cmd)
+
+  def evaluate(self, model):
+    epoch = model.epoch.eval()
+    self.output_variables_as_text(model)
+    cmd = './simulator/evaluateAgent.sh %s' % self.root_path
+    os.system(cmd)
+    sente_log_path = self.root_path + '/evaluation/sente/%03d/sente_summary' % epoch
+    for i, l in enumerate(open(sente_log_path)):
+      if i == 1:
+        sente_win_rate = float(l.split('/')[0])
+
+    gote_log_path = self.root_path + '/evaluation/gote/%03d/gote_summary' % epoch
+    for i, l in enumerate(open(gote_log_path)):
+      if i == 1:
+        gote_win_rate = float(l.split('/')[1])
+
+    summary_dict = {}
+    summary_dict["test/win_rate/sente"] = sente_win_rate
+    summary_dict["test/win_rate/gote"] = gote_win_rate
+    summary = tf_utils.make_summary(summary_dict)
+    self.summary_writer.add_summary(summary, model.epoch.eval())
 
   def train(self):
     model = self.create_model(self.config)
@@ -83,7 +104,7 @@ class ExperimentManager(ManagerBase):
 
       self.save_model(model)
       self.output_variables_as_text(model)
-
+      self.evaluate(model)
       batches = self.dataset.get_batches(
         self.config.batch_size, model.epoch.eval(), is_training=True)
 
@@ -100,6 +121,7 @@ class ExperimentManager(ManagerBase):
       self.summary_writer.add_summary(summary, model.epoch.eval())
 
       model.add_epoch()
+    self.evaluate(model)
 
   def batch_check(self, model=None):
     batches = self.dataset.get_batches(
