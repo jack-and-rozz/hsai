@@ -32,12 +32,12 @@ fi
 for i in `seq 0 9`
 do
   echo "java -jar $jar_path $exe_path1 $exe_path2 $model_dir $model_evaluation_path1"
-  gtimeout -sKILL 60 java -jar $jar_path $exe_path1 $exe_path2 $model_dir $model_evaluation_path1 None random
+  gtimeout -sKILL 60 java -jar $jar_path $exe_path1 $exe_path2 $model_dir $model_evaluation_path1
 done
 for i in `seq 0 9`
 do
   echo "java -jar $jar_path $exe_path2 $exe_path1 $model_dir $model_evaluation_path2"
-  gtimeout -sKILL 60 java -jar $jar_path $exe_path2 $exe_path1 $model_dir $model_evaluation_path2 None random
+  gtimeout -sKILL 60 java -jar $jar_path $exe_path2 $exe_path1 $model_dir $model_evaluation_path2 
 done
 
 for filepath in $model_evaluation_path1/*; do
