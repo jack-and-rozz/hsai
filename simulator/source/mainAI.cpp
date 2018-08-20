@@ -7,14 +7,11 @@
 #include <fstream>
 #include <chrono>
 
+
+#include "mainAI.hpp"
+
 //8/4 use card value
 // 80 to 15! so strong
-
-#define DEBUG
-#define RANDOM_PICK
-#define READ_EPOCH_FILE
-//#define TEKAGEN
-//#define DEBUG_PRINT
 
 #ifdef READ_EPOCH_FILE
 #include <dirent.h>
@@ -1729,6 +1726,23 @@ void readModel(){
 
 int main(int argc,char *argv[])
 {
+
+#ifdef DEBUG
+    cerr << "debug mode" << endl;
+#endif
+#ifdef RANDOM_PICK
+    cerr << "random mode" << endl;
+#endif
+#ifdef READ_EPOCH_FILE
+    cerr << "epoch mode" << endl;
+#endif
+#ifdef TEKAGEN
+    cerr << "tekagen mode" << endl;
+#endif
+#ifdef DEBUG_PRINT
+    cerr << "debug print mode" << endl;
+#endif
+
 
 #ifdef DEBUG
     logDirName = argv[1];
