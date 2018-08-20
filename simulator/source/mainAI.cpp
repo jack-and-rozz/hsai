@@ -8,7 +8,7 @@
 #include <chrono>
 
 
-#include "mainAI.hpp"
+//#include "mainAI.hpp"
 
 //8/4 use card value
 // 80 to 15! so strong
@@ -765,6 +765,8 @@ int getTradeScore(Card* me, Card* target){
 }
 
 int LEATHAL_DANGER_VALUE = 7;
+bool isSente = false;
+int totalPick = 0;
 
 double getBoardScore(vector<Card*> myBoardCard, vector<Card*> enemyBoardCard, Player* me, Player* enemy){
     // enemy lethal
@@ -777,12 +779,15 @@ double getBoardScore(vector<Card*> myBoardCard, vector<Card*> enemyBoardCard, Pl
         }
     }
     int totalAttack = 0;
+    int totalAttackHealth = 0;
     int nextTotalAttack = 0;
     int lifeStealTotal = 0;
+    int enemyAttackTotal = 0;
     //cerr << "myboard" << endl;
     for(Card* card: myBoardCard){
         cerr << card->getID();
         nextTotalAttack += card->getAttack();
+        totalAttackHealth += card->getDefense();
         if(!card->getActionDone()){
             totalAttack += card->getAttack();
         }
@@ -791,10 +796,19 @@ double getBoardScore(vector<Card*> myBoardCard, vector<Card*> enemyBoardCard, Pl
     //cerr << endl << "enemyboard" << endl;
     for(Card* card: enemyBoardCard){
         cerr << card->getID();
+        enemyAttackTotal += card->getAttack();
         if(card -> isDrain()){
             lifeStealTotal += card->getAttack();
         }
     }
+
+    if(totalAttackHealth - enemyAttackTotal > 0){
+        nextTotalAttack = nextTotalAttack * (totalAttackHealth - enemyAttackTotal) / totalAttackHealth;
+    }
+    else{
+        nextTotalAttack = 0;
+    }
+
     //cerr << endl;
     if((!hasTaunt && totalAttack >= enemy->getHealth()) || enemy->getHealth() <= 0){
         lethalScore = 10000;
@@ -835,7 +849,7 @@ double getBoardScore(vector<Card*> myBoardCard, vector<Card*> enemyBoardCard, Pl
     }
 
     int enemyCardValueTotal = 0;
-    int enemyAttackTotal = 0;
+    enemyAttackTotal = 0;
     for(Card* enemyCard: enemyBoardCard){
         int maxTradeScore = 0;
         for(Card* myCard: myBoardCard){
@@ -1577,7 +1591,7 @@ vector<vector<double> > getOneHot(){
 
     vector<vector<double> > result;
     result.resize(1);
-    result[0].resize(640);
+    result[0].resize(643);
     for(int i = 0; i < 160; i++){
         if(currentDeck[i] == 0){
             result[0][i * 4] = 1;
@@ -1596,6 +1610,15 @@ vector<vector<double> > getOneHot(){
         result[0][i * 4 + 2] = 1;
         result[0][i * 4 + 3] = 1;*/
     }
+    if(isSente){
+        result[0][640] = 1;
+        result[0][641] = 0;
+    }
+    else{
+        result[0][640] = 1;
+        result[0][641] = 0;
+    } 
+    result[0][642] = totalPick;
     return result;
 }
 
@@ -1822,6 +1845,14 @@ int main(int argc,char *argv[])
 
         // while draft phase
         Card* lowestCard = nullptr;
+
+        if(me->getDeck() == opponent->getDeck()){
+            isSente = true;
+        }
+        else{
+            isSente = false;
+        }
+
         int lowestIndex = -1;
         double maxScore = -9999999;
         int i = 0;
@@ -1897,6 +1928,7 @@ int main(int argc,char *argv[])
 
             cerr << lowestIndex << endl;
             cout << "PICK " << lowestIndex << endl;
+            totalPick ++;
 
 #ifdef DEBUG
             ofstream outputfile(logDirName, ios::app);
