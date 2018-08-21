@@ -3,7 +3,7 @@ import tensorflow as tf
 import numpy as np
 from pprint import pprint
 from core.utils.tf_utils import linear, batch_gather, shape
-from core.utils.common import dbgprint, dotDict, recDotDefaultDict
+from core.utils.common import dbgprint, dotDict, recDotDefaultDict, flatten_recdict
 from core.models import ModelBase
 
 NUM_CANDIDATES = 3
@@ -25,8 +25,22 @@ class NStepTD(ModelBase):
 
     with tf.name_scope('keep_prob'):
       self.keep_prob = 1.0 - tf.to_float(self.ph.is_training) * config.dropout_rate
+
+    for k, v in flatten_recdict(self.ph).items():
+      print(k, v)
+    state = tf.concat([
+      self.ph.state, self.ph.is_sente, 
+      tf.expand_dims(self.ph.current_num_cards, -1)
+    ], axis=-1)
+    next_state = tf.concat([
+      self.ph.next_state, self.ph.is_sente, 
+      tf.expand_dims(self.ph.current_num_cards + 1, -1)
+    ], axis=-1)
+    state = tf.cast(state, tf.float32)
+    next_state = tf.cast(next_state, tf.float32)
+
     self.q_values, self.q_values_of_selected_action, self.target = self.inference(
-      self.ph.state, self.ph.action, self.ph.next_state, 
+      state, self.ph.action, next_state, 
       self.ph.next_candidates, self.ph.reward, self.ph.is_end_state)
     with tf.name_scope('loss'):
       self.loss = self._clipped_loss(self.target, 
@@ -36,11 +50,11 @@ class NStepTD(ModelBase):
 
   def inference(self, state, action, next_state, next_candidates, 
                 reward, is_end_state):
-    q_values = self.calc_q_values(self.ph.state) # [batch_size, vocab_size] 
+    q_values = self.calc_q_values(state) # [batch_size, vocab_size] 
 
     # The Q values only of the action chosen in the current step.
     with tf.name_scope('dynamic_batch_size'):
-      batch_size = shape(self.ph.state, 0)
+      batch_size = shape(state, 0)
 
     with tf.name_scope('q_values_of_selected_action'):
       q_values_of_selected_action = tf.reshape(
@@ -90,6 +104,9 @@ class NStepTD(ModelBase):
     input_feed = {}
     input_feed[self.ph.state] = batch.state
     input_feed[self.ph.is_training] = batch.is_training
+    input_feed[self.ph.is_sente] = batch.is_sente
+    input_feed[self.ph.current_num_cards] = batch.current_num_cards
+    
     if batch.next_state:
       input_feed[self.ph.next_state] = batch.next_state
       input_feed[self.ph.next_candidates] = batch.next_candidates
@@ -122,14 +139,14 @@ class NStepTD(ModelBase):
       ph = dotDict()
       ph.is_training = tf.placeholder(tf.bool, name='is_training', shape=[])
       ph.state = tf.placeholder(
-        tf.float32, name='ph.state',
+        tf.int32, name='ph.state',
         shape=[None, config.vocab_size.card * (config.max_num_card+1)])
       ph.candidates = tf.placeholder(
         tf.int32, name='ph.next_state',
         shape=[None, NUM_CANDIDATES])
 
       ph.next_state = tf.placeholder(
-        tf.float32, name='ph.next_state',
+        tf.int32, name='ph.next_state',
         shape=[None, config.vocab_size.card * (config.max_num_card+1)])
 
       ph.next_candidates = tf.placeholder(
@@ -140,6 +157,10 @@ class NStepTD(ModelBase):
       ph.reward = tf.placeholder(tf.float32, name='ph.reward', shape=[None])
       ph.is_end_state = tf.placeholder(
         tf.bool, name='ph.is_end_state', shape=[None])
+      ph.is_sente = tf.placeholder(
+        tf.int32, name='ph.is_sente', shape=[None, 2])
+      ph.current_num_cards = tf.placeholder(
+        tf.int32, name='ph.current_num_cards', shape=[None])
     return ph
 
   
