@@ -46,6 +46,7 @@ class ExperimentManager(ManagerBase):
     variables_path = self.root_path + '/variables.list'
     with open(variables_path, 'w') as f:
       variable_names = sorted([v.name + ' ' + str(v.get_shape()) for v in tf.global_variables()])
+      variable_names = [name for name in variable_names if not re.search('Adam', name)]
       f.write('\n'.join(variable_names) + '\n')
     return self.model
 
