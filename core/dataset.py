@@ -79,7 +79,9 @@ class HSReplayDatasetBase(object):
     for i, fpath in enumerate(replays):
       if i % (len(replays) // 10) == 0:
         sys.stderr.write('Reading logs from \'%s\' ... (%d/%d)\n' % (replay_path, i, len(replays)))
-      data += self.add_replay(fpath)
+      replay = self.add_replay(fpath)
+      if replay:
+        data += replay
       #self.add_replay(data, fpath)
     return data
 
