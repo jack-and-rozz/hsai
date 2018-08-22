@@ -9,3 +9,5 @@ g++ source/mainAI.cpp  -o NoNNAgent_sampling -std=c++11
 
 cp source/NoNNAgent_evaluation.hpp source/mainAI.hpp
 g++ source/mainAI.cpp  -o NoNNAgent_evaluation -std=c++11
+
+g++ ../logAnalyzer/logparser.cpp -o logparser -std=c++11
