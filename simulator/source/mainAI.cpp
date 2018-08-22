@@ -8,7 +8,7 @@
 #include <chrono>
 
 
-//#include "mainAI.hpp"
+#include "mainAI.hpp"
 
 //8/4 use card value
 // 80 to 15! so strong
@@ -1325,7 +1325,16 @@ Game* simulateTrade(Card* attacker, Card* target){
                 // target player score
                 Player* damagedOpponent = copyOpponent->getPlayerCopy();
                 damagedOpponent->takeDamage(-hand->getDefense());
-                maxScore = getBoardScore(myBoardCard, enemyBoardCard, copyMe, damagedOpponent) - currentBoardScore - 1 + hand->getDraw();
+                Game* current = new Game(myHandCard, myBoardCard, enemyBoardCard, copyMe, damagedOpponent, "", manaLeft);
+                while(current->getCommands().find("PASS") == std::string::npos){
+                    current = current->simulation(false);
+                }
+                maxScore = current->getGameBoardScore() - currentBoardScore - 1 + hand->getDraw();
+                // lethalでない時はスコアを下げる
+                if(maxScore < 1000){
+                    maxScore /= 2;
+                }
+
                 hand->setPlayScore(maxScore);
                 std::stringstream ss;
                 ss << "USE " << hand->getID() << " " << "-1" << ";";
