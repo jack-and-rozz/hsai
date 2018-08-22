@@ -724,13 +724,13 @@ public:
 
 int executeFight(Card* attacker, Card* target){
     attacker->doAction();
-    if(attacker->isLethal()){
+    if(attacker->isLethal() && attacker->getAttack() > 0){
         target->takeDamage(max(attacker->getAttack(), target->getDefense() + 1));
     }
     else{
         target->takeDamage(attacker->getAttack());
     }
-    if(target->isLethal()){
+    if(target->isLethal() && target->getAttack() > 0){
         attacker->takeDamage(max(target->getAttack(), attacker->getDefense() + 1));
     }
     else{
@@ -826,7 +826,7 @@ double getBoardScore(vector<Card*> myBoardCard, vector<Card*> enemyBoardCard, Pl
     int myCardValueTotal = 0;
     int myDefenceTotal = 0;
     for(Card* myCard: myBoardCard){
-        int minTradeScore = -999;
+        int minTradeScore = 999;
         for(Card* enemyCard: enemyBoardCard){
             int score = getTradeScore(myCard, enemyCard);
             if(minTradeScore > score){
@@ -840,7 +840,7 @@ double getBoardScore(vector<Card*> myBoardCard, vector<Card*> enemyBoardCard, Pl
         /*if(myCard->isLethal()){
             basicValue += me->getMana();
         }*/
-        if(minTradeScore != -999){
+        if(minTradeScore != 999){
             myCardValueTotal += max(basicValue, minTradeScore + basicValue);
         }
         else{
@@ -858,6 +858,7 @@ double getBoardScore(vector<Card*> myBoardCard, vector<Card*> enemyBoardCard, Pl
                 maxTradeScore = score;
             }
         }
+        
         int basicValue = enemyCard->calcBasicValue();
         /*if(enemyCard->isLethal()){
             basicValue += me->getMana();

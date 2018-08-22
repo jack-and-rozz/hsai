@@ -83,6 +83,18 @@ int main(int argc,char *argv[]){
     int* cardTypes = new int[160];
     int totalMatches = 0;
 
+    long*** cardSoukan = new long**[2];
+    for(int n = 0; n < 2; n ++){
+        cardSoukan[n] = new long*[160];
+        for(int i = 0; i < 160; i ++){
+            cardSoukan[n][i] = new long[160];
+            for(int j = 0; j < 160; j ++){
+                cardSoukan[n][i][j] = 0;
+            }
+        }
+    }
+
+
     // parse cardlist
     std::ifstream ifs("cardlist.txt");
     std::string str;
@@ -250,6 +262,7 @@ int main(int argc,char *argv[]){
                                 if(lineNo == 90){
                                     int* manaCurve = new int[13];
                                     int* typeTotal = new int[4];
+                                    int* currentTotal = new int[160];
                                     for(int i = 0; i < 13; i ++){
                                         manaCurve[i] = 0;
                                     }
@@ -261,6 +274,7 @@ int main(int argc,char *argv[]){
                                         if(i == std::atoi(str.c_str()) - 1){
                                             cnt ++;
                                         }
+                                        currentTotal[i] = cnt;
                                         manaCurve[cardCosts[i]] += cnt;
                                         typeTotal[cardTypes[i]] += cnt;
                                         if(winPlayer == 1){
@@ -270,6 +284,16 @@ int main(int argc,char *argv[]){
                                         else{
                                             cardLose[0][i] += cnt;
                                             cardTotalLose[0][i][cnt] += 1;
+                                        }
+                                    }
+                                    for(int i = 0; i < 160; i ++){
+                                        for(int n = 0; n < 160; n ++){
+                                            if(winPlayer == 1){
+                                                cardSoukan[0][i][n] += min(currentTotal[i], currentTotal[n]);
+                                            }
+                                            else{
+                                                cardSoukan[0][i][n] -= min(currentTotal[i], currentTotal[n]);
+                                            }
                                         }
                                     }
                                     for(int i = 0; i < 13; i ++){
@@ -309,6 +333,7 @@ int main(int argc,char *argv[]){
                                 if(lineNo == 90){
                                     int* manaCurve = new int[13];
                                     int* typeTotal = new int[4];
+                                    int* currentTotal = new int[160];
                                     for(int i = 0; i < 13; i ++){
                                         manaCurve[i] = 0;
                                     }
@@ -320,6 +345,7 @@ int main(int argc,char *argv[]){
                                         if(i == std::atoi(str.c_str()) - 1){
                                             cnt ++;
                                         }
+                                        currentTotal[i] = cnt;
                                         manaCurve[cardCosts[i]] += cnt;
                                         typeTotal[cardTypes[i]] += cnt;
                                         if(winPlayer == 2){
@@ -329,6 +355,16 @@ int main(int argc,char *argv[]){
                                         else{
                                             cardLose[1][i] += cnt;
                                             cardTotalLose[1][i][cnt] += 1;
+                                        }
+                                    }
+                                    for(int i = 0; i < 160; i ++){
+                                        for(int n = 0; n < 160; n ++){
+                                            if(winPlayer == 2){
+                                                cardSoukan[1][i][n] += min(currentTotal[i], currentTotal[n]);
+                                            }
+                                            else{
+                                                cardSoukan[1][i][n] -= min(currentTotal[i], currentTotal[n]);
+                                            }
                                         }
                                     }
                                     for(int i = 0; i < 13; i ++){
