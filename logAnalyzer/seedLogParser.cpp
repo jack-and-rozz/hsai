@@ -425,7 +425,7 @@ int main(int argc,char *argv[]){
         for(int i = 0; i < 160; i ++){
             cout << "{";
             for(int j = 0; j < 160; j ++){
-                cout << cardSoukan[n][i];
+                cout << cardSoukan[n][i][j];
                 if(j != 159){
                     cout << ",";
                 }
