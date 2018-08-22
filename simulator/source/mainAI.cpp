@@ -1330,10 +1330,6 @@ Game* simulateTrade(Card* attacker, Card* target){
                     current = current->simulation(false);
                 }
                 maxScore = current->getGameBoardScore() - currentBoardScore - 1 + hand->getDraw();
-                // lethalでない時はスコアを下げる
-                if(maxScore < 1000){
-                    maxScore /= 2;
-                }
 
                 hand->setPlayScore(maxScore);
                 std::stringstream ss;
