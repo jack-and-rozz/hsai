@@ -7,7 +7,7 @@ model_replay_path=$model_dir/replays
 exe_path1=$simulator_dir/NNAgent_sampling
 exe_path2=$simulator_dir/noNNAgent_sampling
 jar_path=$simulator_dir/locam.jar
-timeout=timeout
+timeout=gtimeout
 
 usage() {
     echo "Usage:$0 model_dir agent1_path agent2_path"
