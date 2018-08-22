@@ -46,6 +46,7 @@ class ExperimentManager(ManagerBase):
     variables_path = self.root_path + '/variables.list'
     with open(variables_path, 'w') as f:
       variable_names = sorted([v.name + ' ' + str(v.get_shape()) for v in tf.global_variables()])
+      variable_names = [name for name in variable_names if not re.search('Adam', name)]
       f.write('\n'.join(variable_names) + '\n')
     return self.model
 
@@ -137,12 +138,23 @@ class ExperimentManager(ManagerBase):
     if not model:
       model = self.create_model(self.config)
       self.output_variables_as_text(model)
+      exit(1)
     batch = common.recDotDefaultDict()
-    state = [[1.0 for _ in range(640)]]
+    state = [common.flatten([[1, 0, 0, 0] for _ in range(160)])]
     batch.state = state
+    batch.is_sente = [[1, 0] for _ in state]
+    batch.current_num_cards = [[1, 1] for s in state]
     batch.is_training = False
     res = model.step(batch, 0)
     print (res)
+
+    batches = self.dataset.get_batches(
+      self.config.batch_size, 0, is_training=True)
+    for b in batches:
+      b = common.flatten_recdict(b)
+      for k in b:
+        print(k, b[k])
+      exit(1)
     
 def main(args):
   tf_config = tf.ConfigProto(

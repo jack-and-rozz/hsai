@@ -24,7 +24,7 @@ fi
 while true 
 do
     echo "java -jar $jar_path $exe_path1 $exe_path2 $model_dir $model_replay_path"
-    gtimeout -sKILL 60 java -jar $jar_path $exe_path1 $exe_path2 $model_dir $model_replay_path &
-    gtimeout -sKILL 60 java -jar $jar_path $exe_path2 $exe_path1 $model_dir $model_replay_path &
+    gtimeout -sKILL 20 java -jar $jar_path $exe_path1 $exe_path2 $model_dir $model_replay_path &
+    gtimeout -sKILL 20 java -jar $jar_path $exe_path2 $exe_path1 $model_dir $model_replay_path &
     wait
 done

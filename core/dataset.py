@@ -8,8 +8,15 @@ from core.models import *
 
 WIN_REWARD = 1 
 LOSE_REWARD = -1
-
+def onehot_to_state(onehot_state, max_num_card):
+  raise NotImplementedError
+  
 def state_to_onehot(state, max_num_card):
+  '''
+  Args:
+  - state: A list, bag of cards. Each dimension specifies the number of picked card.
+  - max_num_card: An interger, the maximum number per card to make one-hot representation.
+  '''
   # Expand the dimensions of state by max_num_card.
   one_hot_state = [0 for _ in range(len(state) * (max_num_card + 1))]
   for i, n in enumerate(state):
@@ -18,7 +25,7 @@ def state_to_onehot(state, max_num_card):
   return one_hot_state
     
 
-def read_log(fpath, max_num_card, num_next_candidates_samples):
+def read_log(fpath, max_num_card, num_next_candidates_samples, is_sente):
   if not os.path.exists(fpath):
     return 
   logs = [l.strip() for l in open(fpath)]
@@ -48,6 +55,8 @@ def read_log(fpath, max_num_card, num_next_candidates_samples):
     d.action = action
     d.reward = reward
     d.is_end_state = is_end_state
+    d.is_sente = [1, 0] if is_sente else [0, 1]
+    d.current_num_cards = sum(state) 
     data.append(d)
   data[-1].is_end_state = True
   return data
@@ -79,7 +88,9 @@ class HSReplayDatasetBase(object):
     for i, fpath in enumerate(replays):
       if i % (len(replays) // 10) == 0:
         sys.stderr.write('Reading logs from \'%s\' ... (%d/%d)\n' % (replay_path, i, len(replays)))
-      data += self.add_replay(fpath)
+      replay = self.add_replay(fpath)
+      if replay:
+        data += replay
       #self.add_replay(data, fpath)
     return data
 
@@ -104,9 +115,9 @@ class HSReplayDatasetBase(object):
     # Read player actions and the state there.
     # log = [state, candidate, action, reward, is_end_state]
     p1fname = 'player1-' + fkey
-    p1log = read_log(os.path.join(fdir, p1fname), self.max_num_card, self.num_next_candidates_samples)
+    p1log = read_log(os.path.join(fdir, p1fname), self.max_num_card, self.num_next_candidates_samples, True)
     p2fname = 'player2-' + fkey
-    p2log = read_log(os.path.join(fdir, p2fname), self.max_num_card, self.num_next_candidates_samples)
+    p2log = read_log(os.path.join(fdir, p2fname), self.max_num_card, self.num_next_candidates_samples, False)
 
     if not p1log or not p2log: # Log parse error
       return
