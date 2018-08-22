@@ -419,6 +419,22 @@ int main(int argc,char *argv[]){
         cout << "}:" << endl;
     }
 
+    for(int n = 0; n < 2; n ++){
+        cout << "----------" << endl;
+        cout << "{";
+        for(int i = 0; i < 160; i ++){
+            cout << "{";
+            for(int j = 0; j < 160; j ++){
+                cout << cardSoukan[n][i];
+                if(j != 159){
+                    cout << ",";
+                }
+            }
+            cout << "},";
+        }
+        cout << "};" << endl;
+    }
+
     cout << "totalMatch:" << totalMatches << endl;
 
     free(namelist);
