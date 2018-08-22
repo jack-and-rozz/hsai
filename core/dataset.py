@@ -26,6 +26,7 @@ def state_to_onehot(state, max_num_card):
     
 
 def read_log(fpath, max_num_card, num_next_candidates_samples, is_sente):
+  print(fpath)
   if not os.path.exists(fpath):
     return 
   logs = [l.strip() for l in open(fpath)]
@@ -118,10 +119,11 @@ class HSReplayDatasetBase(object):
     p1log = read_log(os.path.join(fdir, p1fname), self.max_num_card, self.num_next_candidates_samples, True)
     p2fname = 'player2-' + fkey
     p2log = read_log(os.path.join(fdir, p2fname), self.max_num_card, self.num_next_candidates_samples, False)
-
+    print(p1log, p2log)
+    exit(1)
     if not p1log or not p2log: # Log parse error
       return
-
+    
     result = [int(x) for x in open(fpath).readline().split()] # Read the result of the game
     # Set the result of the game as reward.
     if result[0] == -1 or result[1] == -1:
