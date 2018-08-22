@@ -594,7 +594,7 @@ public:
             base += 1;
         }
         if(isDrain()){
-            base += attack;
+            //base += attack;
         }
         if(isBreakThrough()){
             if(attack >= 5){
@@ -725,13 +725,13 @@ public:
 int executeFight(Card* attacker, Card* target){
     attacker->doAction();
     if(attacker->isLethal()){
-        target->takeDamage(999);
+        target->takeDamage(max(attacker->getAttack(), target->getDefense() + 1));
     }
     else{
         target->takeDamage(attacker->getAttack());
     }
     if(target->isLethal()){
-        attacker->takeDamage(999);
+        attacker->takeDamage(max(target->getAttack(), attacker->getDefense() + 1));
     }
     else{
         attacker->takeDamage(target->getAttack());
@@ -871,8 +871,18 @@ double getBoardScore(vector<Card*> myBoardCard, vector<Card*> enemyBoardCard, Pl
         leathalPenalty = (enemyAttackTotal - myDefenceTotal - me->getHealth() + LEATHAL_DANGER_VALUE + 1) * 100;
     }
 
-    int finalScore = myCardValueTotal - enemyCardValueTotal - leathalPenalty + lethalScore;
+    double finalScore = myCardValueTotal - enemyCardValueTotal - leathalPenalty + lethalScore;
     //cerr << finalScore << endl;
+
+    //finalScore += me->getHealth() / 1000;
+    //finalScore -= enemy->getHealth() / 1000;
+
+    if(enemyBoardCard.size() == 0){
+        finalScore += 0.5;
+    }
+    if(myBoardCard.size() == 0){
+        finalScore -= 0.5;
+    }
 
     return finalScore;
 }
@@ -880,9 +890,9 @@ double getBoardScore(vector<Card*> myBoardCard, vector<Card*> enemyBoardCard, Pl
 class SaikiResult{
 public:
     vector<Card*> useCards;
-    int score;
+    double score;
 
-    SaikiResult(vector<Card*> useCards, int score){
+    SaikiResult(vector<Card*> useCards, double score){
         this->useCards = useCards;
         this->score = score;
     }
@@ -916,9 +926,9 @@ public:
         else{
             // 貪欲だが、1階層目だけ展開する
 
-            int maxScore = -99999999;
+            double maxScore = -99999999;
             Game* resultGame = nullptr;
-            int currentBoardScore = getBoardScore(myBoardCard, enemyBoardCard, me, opponent);
+            double currentBoardScore = getBoardScore(myBoardCard, enemyBoardCard, me, opponent);
 
             for(Card* card: myBoardCard){
                 // deal yuuri trade
@@ -954,13 +964,13 @@ public:
 
         // 貪欲だが、1階層目だけ展開する
 
-        int maxScore = -99999999;
+        double maxScore = -99999999;
         Game* resultGame = nullptr;
 
         for(Game* game: getNextGames()){
             vector<Game*> finalGames = game->getNextGames();
             for(Game* finalGame: finalGames){
-                int score = finalGame->getGameBoardScore();
+                double score = finalGame->getGameBoardScore();
                 if(score > maxScore){
                     maxScore = score;
                     resultGame = game;
@@ -994,7 +1004,7 @@ public:
                 if(enemyCard->isGuard()){
                     hasTaunt = true;
                     Game* simulateResult = simulateTrade(card, enemyCard);
-                    int score = simulateResult->getGameBoardScore();
+                    double score = simulateResult->getGameBoardScore();
                     if(score > maxScore){
                         maxScore = score;
                         resultGame = simulateResult;
@@ -1007,7 +1017,7 @@ public:
             if (!hasTaunt) {
                 // calculate face attack value
                 Game* simulateResult = simulateTrade(card, nullptr);
-                int faceScore = simulateResult->getGameBoardScore();
+                double faceScore = simulateResult->getGameBoardScore();
                 if(faceScore > maxScore){
                     maxScore = faceScore;
                     resultGame = simulateResult;
@@ -1018,7 +1028,7 @@ public:
 
                 for(Card* enemyCard: enemyBoardCard){
                     Game* simulateResult = simulateTrade(card, enemyCard);
-                    int score = simulateResult->getGameBoardScore();
+                    double score = simulateResult->getGameBoardScore();
                     if(score > maxScore){
                         maxScore = score;
                         resultGame = simulateResult;
@@ -1213,7 +1223,7 @@ Game* simulateTrade(Card* attacker, Card* target){
         return result;
     }
 
-    int getGameBoardScore(){
+    double getGameBoardScore(){
         return getBoardScore(myBoardCard, enemyBoardCard, me, opponent);
     }
 
@@ -1231,7 +1241,7 @@ Game* simulateTrade(Card* attacker, Card* target){
         
         if(hand->getType() == 1){
             if(myBoardCard.size() != 0){
-                int maxScore = -99999;
+                double maxScore = -99999;
                 for(Card* targetCreature : myBoardCard){
                     vector<Card*> myBoardCardCopy;
                     for(Card* card: myBoardCard){
@@ -1248,7 +1258,7 @@ Game* simulateTrade(Card* attacker, Card* target){
                     while(current->getCommands().find("PASS") == std::string::npos){
                         current = current->simulation(false);
                     }
-                    int score = current->getGameBoardScore() - currentBoardScore - 1 + hand->getDraw();
+                    double score = current->getGameBoardScore() - currentBoardScore - 1 + hand->getDraw();
                     if(score > maxScore){
                         maxScore = score;
                         hand->setPlayScore(score);
@@ -1264,7 +1274,7 @@ Game* simulateTrade(Card* attacker, Card* target){
         }
         else if(hand->getType() == 2){
             if(enemyBoardCard.size() != 0){
-                int maxScore = -99999;
+                double maxScore = -99999;
                 for(Card* targetCreature : enemyBoardCard){
                     vector<Card*> enemyBoardCardCopy;
                     for(Card* card: enemyBoardCard){
@@ -1295,7 +1305,7 @@ Game* simulateTrade(Card* attacker, Card* target){
                     while(current->getCommands().find("PASS") == std::string::npos){
                         current = current->simulation(false);
                     }
-                    int score = current->getGameBoardScore() - currentBoardScore - 1 + hand->getDraw();
+                    double score = current->getGameBoardScore() - currentBoardScore - 1 + hand->getDraw();
                     if(score > maxScore){
                         maxScore = score;
                         hand->setPlayScore(score);
@@ -1311,7 +1321,7 @@ Game* simulateTrade(Card* attacker, Card* target){
         }
         else if(hand->getType() == 3){
             if(hand->getDefense() < 0){
-                int maxScore = -99999;
+                double maxScore = -99999;
                 // target player score
                 Player* damagedOpponent = copyOpponent->getPlayerCopy();
                 damagedOpponent->takeDamage(-hand->getDefense());
@@ -1351,7 +1361,7 @@ Game* simulateTrade(Card* attacker, Card* target){
                     while(current->getCommands().find("PASS") == std::string::npos){
                         current = current->simulation(false);
                     }
-                    int score = current->getGameBoardScore() - currentBoardScore - 1 + hand->getDraw();
+                    double score = current->getGameBoardScore() - currentBoardScore - 1 + hand->getDraw();
                     if(score > maxScore){
                         maxScore = score;
                         hand->setPlayScore(score);
@@ -1381,7 +1391,7 @@ Game* simulateTrade(Card* attacker, Card* target){
                 while(current->getCommands().find("PASS") == std::string::npos){
                     current = current->simulation(false);
                 }
-                int score = current->getGameBoardScore() - currentBoardScore - 1 + hand->getDraw();
+                double score = current->getGameBoardScore() - currentBoardScore - 1 + hand->getDraw();
                 hand->setPlayScore(score);
                 std::stringstream ss;
                 ss << "SUMMON " << hand->getID() << ";";
