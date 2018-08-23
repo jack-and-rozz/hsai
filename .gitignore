@@ -19,3 +19,4 @@ simulator/NNAgent_evaluation
 simulator/NNAgent_sampling
 simulator/NoNNAgent_evaluation
 simulator/NoNNAgent_sampling
+simulator/logparser
