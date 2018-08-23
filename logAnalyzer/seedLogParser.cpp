@@ -504,8 +504,8 @@ int main(int argc,char *argv[]){
             double d = ((double)(cardSoukanWin[0][i][j] + cardSoukanWin[1][i][j]) / (double)(cardSoukanWin[0][i][j] + cardSoukanLose[0][i][j] + cardSoukanWin[1][i][j] + cardSoukanLose[1][i][j]));
             unsigned char buf[sizeof d] = {0};
             memcpy(&d, buf, sizeof d);
-            std::vector<unsigned char>(buf, buf + sizeof buf / sizeof buf[0]);
-            encode_base64(buf ,s);
+            std::vector<unsigned char> v(buf, buf + sizeof buf / sizeof buf[0]);
+            encode_base64(v ,s);
             cout << s << endl;
             if(j != 159){
             }
