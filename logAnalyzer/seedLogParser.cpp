@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <fstream>
+#include <iomanip>
 
 using namespace std;
 
@@ -408,6 +409,11 @@ int main(int argc,char *argv[]){
             }
         }
     }
+
+    cout << fixed;
+    // setprecisionで小数点以下8桁を出すように
+    cout << setprecision(3) << result << endl;
+
     for(int n = 0; n < 2; n ++){
         cout << "player:" << n << endl;
         for(int i = 0; i < 160; i ++){
