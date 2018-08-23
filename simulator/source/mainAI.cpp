@@ -386,7 +386,7 @@ double goteManaCurve[13][31]={{0.292966,0.310785,0.328464,0.345464,0.36502,0.400
 {0.312141,0.311556,0.306321,0.312297,0.309925,0.254335,0.117647,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}};
 
 //TODO think about card advantage
-//TODO 
+//TODO
 
 // 0805 honkide 13th
 
@@ -458,22 +458,22 @@ vector<vector<double> > mulMatrix(vector<vector<double> > a,vector<vector<double
 std::vector<std::string> split(std::string str, char del) {
     int first = 0;
     int last = str.find_first_of(del);
- 
+
     std::vector<std::string> result;
- 
+
     while (first < str.size()) {
         std::string subStr(str, first, last - first);
- 
+
         result.push_back(subStr);
- 
+
         first = last + 1;
         last = str.find_first_of(del, first);
- 
+
         if (last == std::string::npos) {
             last = str.size();
         }
     }
- 
+
     return result;
 }
 
@@ -612,14 +612,6 @@ public:
         return cost > another.cost;
     }
 
-    int getPlayScore(){
-        return playScore;
-    }
-
-    void setPlayScore(int score){
-        this->playScore = score;
-    }
-
     void buff(Card* card){
         if(card->isGuard() && !isGuard()){
             abilities += 'G';
@@ -685,8 +677,8 @@ public:
 };
 bool cmp(Card *a, Card *b)
     {
-        return (a->getCost() > b->getCost()); 
-    } 
+        return (a->getCost() > b->getCost());
+    }
 class Player {
     int health;
     int mana;
@@ -768,6 +760,21 @@ int LEATHAL_DANGER_VALUE = 7;
 bool isSente = false;
 int totalPick = 0;
 
+class TradeScore
+{
+  public:
+    int enemyIndex;
+    int myIndex;
+    double score;
+
+    TradeScore(int enemyIndex, int myIndex, double score)
+    {
+        this->enemyIndex = enemyIndex;
+        this->myIndex = myIndex;
+        this->score = score;
+    }
+};
+
 double getBoardScore(vector<Card*> myBoardCard, vector<Card*> enemyBoardCard, Player* me, Player* enemy){
     // enemy lethal
     int lethalScore = 0;
@@ -827,16 +834,20 @@ double getBoardScore(vector<Card*> myBoardCard, vector<Card*> enemyBoardCard, Pl
     int myDefenceTotal = 0;
     for(Card* myCard: myBoardCard){
         int minTradeScore = 999;
-        for(Card* enemyCard: enemyBoardCard){
+
+        // disable min max
+        /*for(Card* enemyCard: enemyBoardCard){
             int score = getTradeScore(myCard, enemyCard);
             if(minTradeScore > score){
                 minTradeScore = score;
             }
-        }
+        }*/
+
         if(myCard->isGuard()){
             myDefenceTotal += myCard->getDefense();
         }
         int basicValue = myCard->calcBasicValue();
+
         /*if(myCard->isLethal()){
             basicValue += me->getMana();
         }*/
@@ -850,23 +861,76 @@ double getBoardScore(vector<Card*> myBoardCard, vector<Card*> enemyBoardCard, Pl
 
     int enemyCardValueTotal = 0;
     enemyAttackTotal = 0;
-    for(Card* enemyCard: enemyBoardCard){
-        int maxTradeScore = 0;
-        for(Card* myCard: myBoardCard){
-            int score = getTradeScore(enemyCard, myCard);
-            if(maxTradeScore < score){
-                maxTradeScore = score;
+
+    // donyoku trade search
+    int* tradeValue = new int[enemyBoardCard.size()];
+    bool *enemyTradeCompleted = new bool[myBoardCard.size()];
+    for (int i = 0; i < enemyBoardCard.size(); i ++){
+        tradeValue[i] = -999;
+        enemyTradeCompleted[i] = false;
+    }
+    bool* myTradeCompleted = new bool[myBoardCard.size()];
+    for (int i = 0; i < myBoardCard.size(); i ++){
+        myTradeCompleted[i] = false;
+    }
+    vector<TradeScore*> trades;
+
+    for (int i = 0; i < myBoardCard.size(); i++)
+    {
+        if (myDefenceTotal > 0 && !myBoardCard[i]->isGuard())
+        {
+            continue;
+        }
+        for (int n = 0; n < enemyBoardCard.size(); n++)
+        {
+            int score = getTradeScore(enemyBoardCard[n], myBoardCard[i]);
+            if(score > 0){
+                trades.push_back(new TradeScore(n, i, score));
             }
         }
-        
-        int basicValue = enemyCard->calcBasicValue();
-        /*if(enemyCard->isLethal()){
-            basicValue += me->getMana();
-        }*/
-        enemyAttackTotal += enemyCard->getAttack();
-        enemyCardValueTotal += max(basicValue, maxTradeScore + basicValue);
     }
-    // avoid enemy leathal
+
+    sort(trades.begin(), trades.end(), [](const auto &lhs, const auto &rhs) {
+        return lhs->score > rhs->score;
+    });
+
+    for(TradeScore* trade: trades){
+        cerr << "trade:" << trade->score << endl;
+        if (myTradeCompleted[trade->myIndex] == false && enemyTradeCompleted[trade->enemyIndex] == false){
+            enemyCardValueTotal += trade->score;
+            myTradeCompleted[trade->myIndex] = true;
+            enemyTradeCompleted[trade->enemyIndex] = true;
+        }
+    }
+    for (Card *enemyCard : enemyBoardCard){
+        int basicValue = enemyCard->calcBasicValue();
+        enemyAttackTotal += enemyCard->getAttack();
+        enemyCardValueTotal += basicValue;
+    }
+
+        // old algorism
+        // for (Card *enemyCard : enemyBoardCard)
+        //     {
+        //         int maxTradeScore = 0;
+        //         for (Card *myCard : myBoardCard)
+        //         {
+        //             int score = getTradeScore(enemyCard, myCard);
+        //             if (maxTradeScore < score)
+        //             {
+        //                 maxTradeScore = score;
+        //             }
+        //         }
+
+        //         int basicValue = enemyCard->calcBasicValue();
+        //         /*if(enemyCard->isLethal()){
+        //         basicValue += me->getMana();
+        //         }*/
+
+        //         enemyAttackTotal += enemyCard->getAttack();
+        //         enemyCardValueTotal += max(basicValue, maxTradeScore + basicValue);
+        //     }
+
+        // avoid enemy leathal
     int leathalPenalty = 0;
     if(enemyAttackTotal >= me->getHealth() + myDefenceTotal - LEATHAL_DANGER_VALUE){
         leathalPenalty = (enemyAttackTotal - myDefenceTotal - me->getHealth() + LEATHAL_DANGER_VALUE + 1) * 100;
@@ -1040,7 +1104,7 @@ public:
                 }
             }
         }
-        
+
         // PASS
         if(resultGame == nullptr){
             resultGame = getCopy();
@@ -1197,7 +1261,7 @@ Game* simulateTrade(Card* attacker, Card* target){
 
         if(myHandCard[index]->getCost() <= leftMana){
             if(myHandCard[index]->getType() == 0){
-                boardLeft --;   
+                boardLeft --;
             }
             vector<Card*> newPlay;
             SaikiResult* tmpResult;
@@ -1220,7 +1284,7 @@ Game* simulateTrade(Card* attacker, Card* target){
                 result = tmpResult;
             }
         }
-        
+
         return result;
     }
 
@@ -1239,7 +1303,7 @@ Game* simulateTrade(Card* attacker, Card* target){
         Player* copyOpponent = opponent->getPlayerCopy();
         copyMe->takeDamage(-hand->getMyHealthChange());
         copyOpponent->takeDamage(-hand->getOpponentHealthChange());
-        
+
         if(hand->getType() == 1){
             if(myBoardCard.size() != 0){
                 double maxScore = -99999;
@@ -1262,7 +1326,6 @@ Game* simulateTrade(Card* attacker, Card* target){
                     double score = current->getGameBoardScore() - currentBoardScore - 1 + hand->getDraw();
                     if(score > maxScore){
                         maxScore = score;
-                        hand->setPlayScore(score);
                         std::stringstream ss;
                         ss << "USE " << hand->getID() << " " << targetCreature->getID() << ";";
                         hand->setCommand(ss.str());
@@ -1270,7 +1333,7 @@ Game* simulateTrade(Card* attacker, Card* target){
                 }
             }
             else{
-                hand->setPlayScore(-999);
+
             }
         }
         else if(hand->getType() == 2){
@@ -1309,7 +1372,6 @@ Game* simulateTrade(Card* attacker, Card* target){
                     double score = current->getGameBoardScore() - currentBoardScore - 1 + hand->getDraw();
                     if(score > maxScore){
                         maxScore = score;
-                        hand->setPlayScore(score);
                         std::stringstream ss;
                         ss << "USE " << hand->getID() << " " << targetCreature->getID() << ";";
                         hand->setCommand(ss.str());
@@ -1317,7 +1379,7 @@ Game* simulateTrade(Card* attacker, Card* target){
                 }
             }
             else{
-                hand->setPlayScore(-999);
+
             }
         }
         else if(hand->getType() == 3){
@@ -1331,8 +1393,6 @@ Game* simulateTrade(Card* attacker, Card* target){
                     current = current->simulation(false);
                 }
                 maxScore = current->getGameBoardScore() - currentBoardScore - 1 + hand->getDraw();
-
-                hand->setPlayScore(maxScore);
                 std::stringstream ss;
                 ss << "USE " << hand->getID() << " " << "-1" << ";";
                 hand->setCommand(ss.str());
@@ -1370,7 +1430,6 @@ Game* simulateTrade(Card* attacker, Card* target){
                     double score = current->getGameBoardScore() - currentBoardScore - 1 + hand->getDraw();
                     if(score > maxScore){
                         maxScore = score;
-                        hand->setPlayScore(score);
                         std::stringstream ss;
                         ss << "USE " << hand->getID() << " " << targetCreature->getID() << ";";
                         hand->setCommand(ss.str());
@@ -1379,7 +1438,6 @@ Game* simulateTrade(Card* attacker, Card* target){
             }
             else{
                 int score = getBoardScore(myBoardCard, enemyBoardCard, copyMe, copyOpponent) - currentBoardScore + 1 + hand->getDraw();
-                hand->setPlayScore(score);
                 std::stringstream ss;
                 ss << "USE " << hand->getID() << " -1" << ";";
                 hand->setCommand(ss.str());
@@ -1398,7 +1456,6 @@ Game* simulateTrade(Card* attacker, Card* target){
                     current = current->simulation(false);
                 }
                 double score = current->getGameBoardScore() - currentBoardScore - 1 + hand->getDraw();
-                hand->setPlayScore(score);
                 std::stringstream ss;
                 ss << "SUMMON " << hand->getID() << ";";
                 hand->setCommand(ss.str());
@@ -1409,13 +1466,12 @@ Game* simulateTrade(Card* attacker, Card* target){
                     myBoardCardCopy.push_back(card);
                 }
                 myBoardCardCopy.push_back(hand);
-                hand->setPlayScore(getBoardScore(myBoardCardCopy, enemyBoardCard, copyMe, copyOpponent) - currentBoardScore);
                 std::stringstream ss;
                 ss << "SUMMON " << hand->getID() << ";";
                 hand->setCommand(ss.str());
             }
             else{
-                hand->setPlayScore(-999);
+
             }
         }
 #ifdef DEBUG_PRINT
@@ -1633,7 +1689,7 @@ vector<vector<double> > getOneHot(){
     else{
         result[0][640] = 1;
         result[0][641] = 0;
-    } 
+    }
     result[0][642] = totalPick;
     return result;
 }
@@ -1747,7 +1803,7 @@ void readModel(){
             weight.push_back(oneLine);
         }
         w.push_back(weight);
-        
+
         /*vector< vector <double> > weight;
         while (getline(ifs, str)){
             vector<string> result = split(str, ' ');
@@ -1757,7 +1813,7 @@ void readModel(){
             }
         }
         w.push_back(weight);*/
-        
+
     }
     cerr << "read weight done" << endl;
 }
@@ -1978,12 +2034,12 @@ int main(int argc,char *argv[])
             if(totalAttack * 2 > opponent->getHealth() + totalDefence){
                 goToFace = true;
             }
-            
+
             // battle phase
             cerr << goToFace << endl;
             Game* current = new Game(myHandCard, myBoardCard, enemyBoardCard, me, opponent, "", me->getMana());
-            
-            // make play card score 
+
+            // make play card score
             vector<Card*> beforePlayCards = current->calcBestPlayCards(goToFace);
             for(Card* card: beforePlayCards){
                 cerr << "beforePlay:" << card->getCommand() << endl;
@@ -2018,7 +2074,7 @@ int main(int argc,char *argv[])
 
 
             int passIndex = current->getCommands().find("PASS");
-            
+
             vector<Card*> playCards;
 
             // play cards untill no more want to play
@@ -2047,6 +2103,6 @@ int main(int argc,char *argv[])
         // Write an action using cout. DON'T FORGET THE "<< endl"
         // To debug: cerr << "Debug messages..." << endl;
 
-       
+
     }
 }
