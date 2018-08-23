@@ -464,9 +464,7 @@ int main(int argc,char *argv[]){
         for(int j = 0; j < 160; j ++){
             double target = ((double)(cardSoukanWin[0][i][j] + cardSoukanWin[1][i][j]) / (double)(cardSoukanWin[0][i][j] + cardSoukanLose[0][i][j] + cardSoukanWin[1][i][j] + cardSoukanLose[1][i][j]));
             int intTarget = target * 10000;
-            char char1 = intTarget / 256;
-            char char2 = intTarget % 256;
-            cout << char1 << char2;
+            cout << intTarget;
         }
     }
     cout << "\"" << endl;
