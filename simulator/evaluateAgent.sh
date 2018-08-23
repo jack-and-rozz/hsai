@@ -3,7 +3,7 @@
 simulator_dir=simulator
 logparser_dir=logAnalyzer
 exe_path1=$simulator_dir/NNAgent_evaluation
-exe_path2=$simulator_dir/noNNAgent_evaluation
+exe_path2=$simulator_dir/NoNNAgent_evaluation
 jar_path=$simulator_dir/locam.jar
 
 model_dir=$1

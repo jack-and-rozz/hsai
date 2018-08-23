@@ -1,11 +1,10 @@
 #!/bin/bash
-#exe_path="/Users/oda/LegendsOfCodeAndMagic/NWTraining/a.out"
 simulator_dir=simulator
 
 model_dir=$1
 model_replay_path=$model_dir/replays
 exe_path1=$simulator_dir/NNAgent_sampling
-exe_path2=$simulator_dir/noNNAgent_sampling
+exe_path2=$simulator_dir/NoNNAgent_sampling
 jar_path=$simulator_dir/locam.jar
 
 
@@ -28,3 +27,4 @@ do
     gtimeout -sKILL 20 java -jar $jar_path $exe_path2 $exe_path1 $model_dir $model_replay_path &
     wait
 done
+
