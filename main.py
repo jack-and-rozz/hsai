@@ -106,7 +106,7 @@ class ExperimentManager(ManagerBase):
 
       self.save_model(model)
       self.output_variables_as_text(model)
-      #self.evaluate(model)
+      self.evaluate(model)
       batches = self.dataset.get_batches(
         self.config.batch_size, model.epoch.eval(), is_training=True)
       average_loss = 0.0
