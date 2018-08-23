@@ -83,13 +83,17 @@ int main(int argc,char *argv[]){
     int* cardTypes = new int[160];
     int totalMatches = 0;
 
-    long*** cardSoukan = new long**[2];
+    long*** cardSoukanWin = new long**[2];
+    long*** cardSoukanLose = new long**[2];
     for(int n = 0; n < 2; n ++){
-        cardSoukan[n] = new long*[160];
+        cardSoukanWin[n] = new long*[160];
+        cardSoukanLose[n] = new long*[160];
         for(int i = 0; i < 160; i ++){
-            cardSoukan[n][i] = new long[160];
+            cardSoukanWin[n][i] = new long[160];
+            cardSoukanLose[n][i] = new long[160];
             for(int j = 0; j < 160; j ++){
-                cardSoukan[n][i][j] = 0;
+                cardSoukanWin[n][i][j] = 0;
+                cardSoukanLose[n][i][j] = 0;
             }
         }
     }
@@ -289,10 +293,10 @@ int main(int argc,char *argv[]){
                                     for(int i = 0; i < 160; i ++){
                                         for(int n = 0; n < 160; n ++){
                                             if(winPlayer == 1){
-                                                cardSoukan[0][i][n] += min(currentTotal[i], currentTotal[n]);
+                                                cardSoukanWin[0][i][n] += min(currentTotal[i], currentTotal[n]);
                                             }
                                             else{
-                                                cardSoukan[0][i][n] -= min(currentTotal[i], currentTotal[n]);
+                                                cardSoukanLose[0][i][n] += min(currentTotal[i], currentTotal[n]);
                                             }
                                         }
                                     }
@@ -360,10 +364,10 @@ int main(int argc,char *argv[]){
                                     for(int i = 0; i < 160; i ++){
                                         for(int n = 0; n < 160; n ++){
                                             if(winPlayer == 2){
-                                                cardSoukan[1][i][n] += min(currentTotal[i], currentTotal[n]);
+                                                cardSoukanWin[1][i][n] += min(currentTotal[i], currentTotal[n]);
                                             }
                                             else{
-                                                cardSoukan[1][i][n] -= min(currentTotal[i], currentTotal[n]);
+                                                cardSoukanLose[1][i][n] += min(currentTotal[i], currentTotal[n]);
                                             }
                                         }
                                     }
@@ -425,7 +429,7 @@ int main(int argc,char *argv[]){
         for(int i = 0; i < 160; i ++){
             cout << "{";
             for(int j = 0; j < 160; j ++){
-                cout << cardSoukan[n][i][j];
+                cout << ((double)cardSoukanWin[n][i][j] / (double)(cardSoukanWin[n][i][j] + cardSoukanLose[n][i][j]));
                 if(j != 159){
                     cout << ",";
                 }
@@ -434,6 +438,19 @@ int main(int argc,char *argv[]){
         }
         cout << "};" << endl;
     }
+    cout << "----------" << endl;
+    cout << "{";
+    for(int i = 0; i < 160; i ++){
+        cout << "{";
+        for(int j = 0; j < 160; j ++){
+            cout << ((double)(cardSoukanWin[0][i][j] + cardSoukanWin[1][i][j]) / (double)(cardSoukanWin[0][i][j] + cardSoukanLose[0][i][j] + cardSoukanWin[1][i][j] + cardSoukanLose[1][i][j]));
+            if(j != 159){
+                cout << ",";
+            }
+        }
+        cout << "},";
+    }
+    cout << "};" << endl;
 
     cout << "totalMatch:" << totalMatches << endl;
 
