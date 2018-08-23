@@ -96,6 +96,7 @@ class ExperimentManager(ManagerBase):
     summary_dict["test/win_rate/gote"] = gote_win_rate
     summary = tf_utils.make_summary(summary_dict)
     self.summary_writer.add_summary(summary, model.epoch.eval())
+    return sente_win_rate, gote_win_rate
 
   def train(self):
     model = self.create_model(self.config)
@@ -105,7 +106,8 @@ class ExperimentManager(ManagerBase):
 
       self.save_model(model)
       self.output_variables_as_text(model)
-      self.evaluate(model)
+      sente_win_rate, gote_win_rate = self.evaluate(model)
+      self.logger.info('Epoch %d, Win Rate (sente, gote) = (%.3f, %.3f)' % (epoch,sente_win_rate, gote_win_rate))
       batches = self.dataset.get_batches(
         self.config.batch_size, model.epoch.eval(), is_training=True)
       average_loss = 0.0
