@@ -412,7 +412,7 @@ int main(int argc,char *argv[]){
 
     cout << fixed;
     // setprecisionで小数点以下8桁を出すように
-    cout << setprecision(3) << result << endl;
+    cout << setprecision(3);
 
     for(int n = 0; n < 2; n ++){
         cout << "player:" << n << endl;
