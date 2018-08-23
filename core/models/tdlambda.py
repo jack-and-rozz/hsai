@@ -4,45 +4,33 @@ import numpy as np
 from pprint import pprint
 from core.utils.tf_utils import linear, batch_gather, shape
 from core.utils.common import dbgprint, dotDict, recDotDefaultDict
-from core.models import ModelBase
+from core.models import ModelBase, NStepTD
+
 NUM_CANDIDATES = 3
 NUM_TURNS = 30
 
 class TDlambda(NStepTD):
   def __init__(self, sess, config):
+    self.td_lambda = config.td_lambda
     super().__init__(sess, config)
-    self.hidden_activation = getattr(tf.nn, config.hidden_activation)
-    self.output_activation = getattr(tf.nn, config.output_activation)
-    #self.activation_f = tf.nn.sigmoid
-    self.hidden_size = config.hidden_size
-    self.num_ff_layers = config.num_ff_layers
-    self.vocab_size = config.vocab_size
-    self.max_num_card = config.max_num_card
-    self.td_gamma = config.td_gamma
 
-    # Define placeholders.
-    with tf.name_scope('Placeholders'):
-      self.ph = dotDict()
-      self.ph.is_training = tf.placeholder(tf.bool, name='is_training', shape=[])
-      self.ph.state = tf.placeholder(
-        tf.float32, name='ph.state',
-        shape=[None, NUM_TURNS, Nconfig.vocab_size.card * (config.max_num_card+1)])
-      self.ph.candidates = tf.placeholder(
-        tf.int32, name='ph.candidates',
-        shape=[None, NUM_TURNS, NUM_CANDIDATES])
+  def calc_loss(self, is_end_state, reward, expected_next_q_values,
+                q_values_of_selected_action):
+    targets = [] 
+    for num_step in range(1, NUM_TURNS-1):
+      with tf.name_scope('get_target_values%02d' % num_step):
+        # あるターンからnum_step先読みしたときのtarget values
+        target_values_after_n_step = self.get_target_values(expected_next_q_values, is_end_state, reward, num_step) # [NUM_TURNS, batch_size]
+        target_values_after_n_step = [(1.0 - self.td_lambda) * (self.td_lambda ** num_step) * x for x in target_values_after_n_step]
+        targets.append(target_values_after_n_step)
 
-      self.ph.next_state = tf.placeholder(
-        tf.float32, name='ph.next_state',
-        shape=[None, NUM_TURNS, config.vocab_size.card * (config.max_num_card+1)])
+    targets = [list(x) for x in zip(*targets)]
+    targets = [tf.reduce_sum(x, axis=0)for x in targets]
 
-      self.ph.next_candidates = tf.placeholder(
-        tf.int32, name='ph.next_candidates',
-        shape=[None, NUM_TURNS, config.num_next_candidates_samples, NUM_CANDIDATES])
-
-      self.ph.action = tf.placeholder(tf.int32, name='ph.action', shape=[None, NUM_TURNS])
-      self.ph.reward = tf.placeholder(tf.float32, name='ph.reward', shape=[None, NUM_TURNS])
-      self.ph.is_end_state = tf.placeholder(
-        tf.bool, name='ph.is_end_state', shape=[None, NUM_TURNS])
-
-    with tf.name_scope('keep_prob'):
-      self.keep_prob = 1.0 - tf.to_float(self.ph.is_training) * config.dropout_rate
+    with tf.name_scope('loss'):
+      losses = []
+      for i in range(NUM_TURNS):
+        loss = self._clipped_loss(targets[i], q_values_of_selected_action[i])
+        losses.append(loss)
+      loss = tf.reduce_mean(losses)
+    return loss

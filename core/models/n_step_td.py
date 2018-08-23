@@ -57,17 +57,17 @@ class NStepTD(ModelBase):
         expected_next_q_values.append(next_qv)
 
       self.q_values = q_values 
-      self.loss = self.calc_n_step_loss(is_end_state, reward, 
-                                        expected_next_q_values, 
-                                        q_values_of_selected_action,
-                                        self.num_step)
-      self.updates = self.get_updates(self.loss, self.global_step)
 
-  def calc_n_step_loss(self, is_end_state, reward, expected_next_q_values,
-                       q_values_of_selected_action, N):
+    with tf.name_scope('calc_loss'):
+      self.loss = self.calc_loss(is_end_state, reward, expected_next_q_values, 
+                            q_values_of_selected_action)
+    self.updates = self.get_updates(self.loss, self.global_step)
+
+  def calc_loss(self, is_end_state, reward, expected_next_q_values,
+                       q_values_of_selected_action):
     with tf.name_scope('get_target_values'):
       targets = self.get_target_values(expected_next_q_values, is_end_state, 
-                                       reward, N)
+                                       reward, self.num_step)
     with tf.name_scope('loss'):
       losses = []
       for i in range(NUM_TURNS):
@@ -215,7 +215,7 @@ class NStepTD(ModelBase):
     #self.debug_ops = [self.q_values_of_selected_action,  self.masked_next_q_values, self.expected_next_q_value, self.target, self.ph.reward]
     self.debug_ops = [
       self.loss,
-      self.q_values
+      #self.q_values
       #self.masked_next_q_values, 
       #self.expected_next_q_value, 
       #self.target, self.ph.reward,
