@@ -1,9 +1,9 @@
-#include <sys/stat.h>
 #include <dirent.h>
 #include <iostream>
 #include <vector>
 #include <fstream>
 #include <iomanip>
+#include <sys/stat.h>
 
 using namespace std;
 
@@ -28,6 +28,44 @@ std::vector<std::string> split(std::string str, char del) {
     }
  
     return result;
+}
+
+// base64 エンコード
+bool encode_base64(const std::vector<unsigned char>& src, std::string& dst)
+{
+    const std::string table("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
+    std::string       cdst;
+
+    for (std::size_t i = 0; i < src.size(); ++i) {
+        switch (i % 3) {
+        case 0:
+            cdst.push_back(table[(src[i] & 0xFC) >> 2]);
+            if (i + 1 == src.size()) {
+                cdst.push_back(table[(src[i] & 0x03) << 4]);
+                cdst.push_back('=');
+                cdst.push_back('=');
+            }
+
+            break;
+        case 1:
+            cdst.push_back(table[((src[i - 1] & 0x03) << 4) | ((src[i + 0] & 0xF0) >> 4)]);
+            if (i + 1 == src.size()) {
+                cdst.push_back(table[(src[i] & 0x0F) << 2]);
+                cdst.push_back('=');
+            }
+
+            break;
+        case 2:
+            cdst.push_back(table[((src[i - 1] & 0x0F) << 2) | ((src[i + 0] & 0xC0) >> 6)]);
+            cdst.push_back(table[src[i] & 0x3F]);
+
+            break;
+        }
+    }
+
+    dst.swap(cdst);
+
+    return true;
 }
 
 int main(int argc,char *argv[]){
@@ -457,6 +495,20 @@ int main(int argc,char *argv[]){
         cout << "},";
     }
     cout << "};" << endl;
+
+    cout << "----------" << endl;
+    for(int i = 0; i < 160; i ++){
+        for(int j = 0; j < 160; j ++){
+            std::string s;
+            double d = ((double)(cardSoukanWin[0][i][j] + cardSoukanWin[1][i][j]) / (double)(cardSoukanWin[0][i][j] + cardSoukanLose[0][i][j] + cardSoukanWin[1][i][j] + cardSoukanLose[1][i][j]));
+            unsigned char buf[sizeof d] = {0};
+            memcpy(&d, buf, sizeof d);
+            encode_base64(buf ,s);
+            cout << s << endl;
+            if(j != 159){
+            }
+        }
+    }   
 
     cout << "------assyuku----" << endl;
     cout << "\"";
