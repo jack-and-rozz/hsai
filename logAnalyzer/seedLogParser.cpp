@@ -198,7 +198,7 @@ int main(int argc,char *argv[]){
 
                 else{
 
-                    if(dirElements < 600){
+                    if(dirElements < 300){
                         cout << string(parentNameList[n] -> d_name) << " has not enough log" <<  endl;
                         continue;
                     }
