@@ -15,3 +15,7 @@ tmp*
 .python-version
 ref
 trained_models/*
+simulator/NNAgent_evaluation
+simulator/NNAgent_sampling
+simulator/NoNNAgent_evaluation
+simulator/NoNNAgent_sampling
