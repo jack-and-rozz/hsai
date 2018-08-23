@@ -8,7 +8,7 @@
 #include <chrono>
 
 
-//#include "mainAI.hpp"
+#include "mainAI.hpp"
 
 #ifdef READ_EPOCH_FILE
 #include <dirent.h>
@@ -1506,7 +1506,12 @@ int main(int argc,char *argv[])
 				//double score = idealManaCurve[card->getCost()] - expectedManaCurve[card->getCost()];
 				double score = 0;
 				for(int i = 0; i < 160; i ++){
-					score += weight[card->getCardNumber() - 1][i];
+					if(i == card->getCardNumber() - 1){
+						score += weight[card->getCardNumber() - 1][i];
+					}
+					else {
+						score += weight[card->getCardNumber() - 1][i] * currentDeck[card->getCardNumber() - 1];
+					}
 				}
 #ifndef TEKAGEN
 
