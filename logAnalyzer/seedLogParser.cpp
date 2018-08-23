@@ -495,27 +495,12 @@ int main(int argc,char *argv[]){
         }
         cout << "},";
     }
-    cout << "};" << endl;
-
-    cout << "----------" << endl;
-    for(int i = 0; i < 160; i ++){
-        for(int j = 0; j < 160; j ++){
-            std::string s;
-            double d = ((double)(cardSoukanWin[0][i][j] + cardSoukanWin[1][i][j]) / (double)(cardSoukanWin[0][i][j] + cardSoukanLose[0][i][j] + cardSoukanWin[1][i][j] + cardSoukanLose[1][i][j]));
-            unsigned char buf[sizeof d] = {0};
-            memcpy(&d, buf, sizeof d);
-            std::vector<unsigned char> v(buf, buf + sizeof buf / sizeof buf[0]);
-            encode_base64(v ,s);
-            cout << s << endl;
-            if(j != 159){
-            }
-        }
-    }   
+    cout << "};" << endl;  
 
     cout << "------assyuku----" << endl;
     cout << "\"";
     for(int i = 0; i < 160; i ++){
-        for(int j = 0; j < 160; j ++){
+        for(int j = i; j < 160; j ++){
             double target = ((double)(cardSoukanWin[0][i][j] + cardSoukanWin[1][i][j]) / (double)(cardSoukanWin[0][i][j] + cardSoukanLose[0][i][j] + cardSoukanWin[1][i][j] + cardSoukanLose[1][i][j]));
             int intTarget = target * 10000;
             cout << intTarget;
