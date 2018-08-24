@@ -300,9 +300,25 @@ int main(int argc,char *argv[]){
                             while (getline(ifs1, str))
                             {
                                 lineNo ++;
-                                if(lineNo == 88){
+                                if (lineNo % 3 == 1){
                                     deckString = split(str, ' ');
                                 }
+
+                                if (lineNo % 3 == 0){
+                                    int pick = std::atoi(str.c_str());
+                                    for(int i = 0; i < 160; i ++){
+                                        int cnt = std::atoi(deckString[i].c_str());
+                                        if(winPlayer == 1){
+                                            cardSoukanWin[0][i][pick] += cnt;
+                                            cardSoukanWin[0][pick][i] += cnt;
+                                        }
+                                        else{
+                                            cardSoukanLose[0][i][pick] += cnt;
+                                            cardSoukanLose[0][pick][i] += cnt;
+                                        }
+                                    }
+                                }
+
                                 if(lineNo == 90){
                                     int* manaCurve = new int[13];
                                     int* typeTotal = new int[4];
@@ -315,7 +331,7 @@ int main(int argc,char *argv[]){
                                     }
                                     for(int i = 0; i < 160; i ++){
                                         int cnt = std::atoi(deckString[i].c_str());
-                                        if(i == std::atoi(str.c_str()) - 1){
+                                        if(i == std::atoi(str.c_str())){
                                             cnt ++;
                                         }
                                         currentTotal[i] = cnt;
@@ -330,7 +346,7 @@ int main(int argc,char *argv[]){
                                             cardTotalLose[0][i][cnt] += 1;
                                         }
                                     }
-                                    for(int i = 0; i < 160; i ++){
+                                    /*for(int i = 0; i < 160; i ++){
                                         for(int n = 0; n < 160; n ++){
                                             if(winPlayer == 1){
                                                 cardSoukanWin[0][i][n] += min(currentTotal[i], currentTotal[n]);
@@ -339,7 +355,7 @@ int main(int argc,char *argv[]){
                                                 cardSoukanLose[0][i][n] += min(currentTotal[i], currentTotal[n]);
                                             }
                                         }
-                                    }
+                                    }*/
                                     for(int i = 0; i < 13; i ++){
                                         if(winPlayer == 1){
                                             manaCurveWin[0][i][manaCurve[i]] += 1;
