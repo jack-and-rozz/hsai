@@ -87,7 +87,7 @@ def read_logs(evaluation_path, epoch):
   return p1logs, p2logs, epoch
 
 
-def analysis(logs, cardlist):
+def analyse(logs, cardlist):
   histogram = recDotDict()
   for key in cardlist[0].keys():
     histogram[key] = defaultdict(int)
@@ -99,12 +99,13 @@ def analysis(logs, cardlist):
     wins += log.win_or_lose
 
   for card_id, freq in histogram.card_id.items():
-    for key, value in cardlist[card_id].items():
-      if key == 'abilities':
+    for prop, value in cardlist[card_id].items():
+      if prop == 'abilities':
         for ability_type in value:
-          histogram[key][ability_type] += freq
+          histogram[prop][ability_type] += freq
       else:
-        histogram[key][value] += freq
+        histogram[prop][value] += freq
+
   return histogram, wins
 
 def read_cardlist(fpath):
@@ -201,8 +202,8 @@ def main(args):
   p1logs = sente_p1 + gote_p1
   p2logs = sente_p2 + gote_p2
 
-  p1hist, p1wins = analysis(p1logs, cardlist)
-  p2hist, p2wins = analysis(p2logs, cardlist)
+  p1hist, p1wins = analyse(p1logs, cardlist)
+  p2hist, p2wins = analyse(p2logs, cardlist)
   if not args.output_dir:
     output_dir = os.path.join(args.model_dir, 'evaluation/visualize/%03d' % epoch)
     if not os.path.exists(output_dir):
@@ -212,12 +213,17 @@ def main(args):
     sys.stdout = f
     print('<p1 statistics>')
     pprint(p1hist)
+    print('')
+    print('<Favorite cards>')
+    print('Card-id, freq =', sorted(p1hist.card_id.items(), key=lambda x: -x[1]))
     sys.stdout = sys.__stdout__
 
   with open(output_dir + '/RuleBase.stat', 'w') as f:
     sys.stdout = f
     print('<p2 statistics>')
     pprint(p2hist)
+    print('<Favorite cards>')
+    print('Card-id, freq =', sorted(p2hist.card_id.items(), key=lambda x: -x[1]))
     sys.stdout = sys.__stdout__
 
   visualize(p1hist, p2hist, output_dir)
