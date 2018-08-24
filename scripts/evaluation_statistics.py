@@ -181,8 +181,9 @@ def visualize(p1stat, p2stat, output_dir):
 
     for j in range(2):
       #sub_ax = fig.add_subplot(1, 2, j+1)  
+      _histtype = 'step' if prop == 'cost' else histtype
       sub_ax.hist(data[j], color=colors[j], label=labels[j],
-                  alpha=alpha, histtype=histtype, bins=bins)
+                  alpha=alpha, histtype=_histtype, bins=bins)
       #if j != 0: 
       #  sub_ax.tick_params(labelcolor='w', left='off', bottom ='on')
 
