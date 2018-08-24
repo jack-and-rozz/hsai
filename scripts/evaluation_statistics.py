@@ -207,13 +207,13 @@ def main(args):
     if not os.path.exists(output_dir):
       os.makedirs(output_dir)
 
-  with open(output_dir + '/NNBase.stat') as f:
+  with open(output_dir + '/NNBase.stat', 'w') as f:
     sys.stdout = f
     print('<p1 statistics>')
     pprint(p1hist)
     sys.stdout = sys.__stdout__
 
-  with open(output_dir + '/RuleBase.stat') as f:
+  with open(output_dir + '/RuleBase.stat', 'w') as f:
     sys.stdout = f
     print('<p2 statistics>')
     pprint(p2hist)
