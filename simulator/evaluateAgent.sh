@@ -10,6 +10,7 @@ model_dir=$1
 model_evaluation_path=$model_dir/evaluation
 model_evaluation_path1=$model_dir/evaluation/sente
 model_evaluation_path2=$model_dir/evaluation/gote
+timeout=timeout
 
 usage() {
     echo "Usage:$0 model_dir exe_path1"
@@ -33,15 +34,15 @@ fi
 for i in `seq 0 9`
 do
   echo "java -jar $jar_path $exe_path1 $exe_path2 $model_dir $model_evaluation_path1"
-  gtimeout -sKILL 20 java -jar $jar_path $exe_path1 $exe_path2 $model_dir $model_evaluation_path1 &
-  gtimeout -sKILL 20 java -jar $jar_path $exe_path1 $exe_path2 $model_dir $model_evaluation_path1 & 
+  $timeout -sKILL 20 java -jar $jar_path $exe_path1 $exe_path2 $model_dir $model_evaluation_path1 &
+  $timeout -sKILL 20 java -jar $jar_path $exe_path1 $exe_path2 $model_dir $model_evaluation_path1 & 
   wait
 done
 for i in `seq 0 9`
 do
   echo "java -jar $jar_path $exe_path2 $exe_path1 $model_dir $model_evaluation_path2"
-  gtimeout -sKILL 20 java -jar $jar_path $exe_path2 $exe_path1 $model_dir $model_evaluation_path2 &
-  gtimeout -sKILL 20 java -jar $jar_path $exe_path2 $exe_path1 $model_dir $model_evaluation_path2 &
+  $timeout -sKILL 20 java -jar $jar_path $exe_path2 $exe_path1 $model_dir $model_evaluation_path2 &
+  $timeout -sKILL 20 java -jar $jar_path $exe_path2 $exe_path1 $model_dir $model_evaluation_path2 &
   wait
 done
 
