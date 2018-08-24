@@ -207,8 +207,18 @@ def main(args):
     if not os.path.exists(output_dir):
       os.makedirs(output_dir)
 
-  print(p1hist.cost)
-  print(p2hist.cost)
+  with open(output_dir + '/NNBase.stat') as f:
+    sys.stdout = f
+    print('<p1 statistics>')
+    pprint(p1hist)
+    sys.stdout = sys.__stdout__
+
+  with open(output_dir + '/RuleBase.stat') as f:
+    sys.stdout = f
+    print('<p2 statistics>')
+    pprint(p2hist)
+    sys.stdout = sys.__stdout__
+
   visualize(p1hist, p2hist, output_dir)
 
 
