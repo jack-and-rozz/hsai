@@ -138,6 +138,9 @@ int main(int argc,char *argv[]){
         }
     }
 
+    long* cardFinalWin = new long[160];
+    long* cardFinalLose = new long[160];
+
 
     // parse cardlist
     std::ifstream ifs("cardlist.txt");
@@ -340,10 +343,12 @@ int main(int argc,char *argv[]){
                                         if(winPlayer == 1){
                                             cardWin[0][i] += cnt;
                                             cardTotalWin[0][i][cnt] += 1;
+                                            cardFinalWin[i] += cnt;
                                         }
                                         else{
                                             cardLose[0][i] += cnt;
                                             cardTotalLose[0][i][cnt] += 1;
+                                            cardFinalLose[i] += cnt;
                                         }
                                     }
                                     /*for(int i = 0; i < 160; i ++){
@@ -427,10 +432,12 @@ int main(int argc,char *argv[]){
                                         if(winPlayer == 2){
                                             cardWin[1][i] += cnt;
                                             cardTotalWin[1][i][cnt] += 1;
+                                            cardFinalWin[i] += cnt;
                                         }
                                         else{
                                             cardLose[1][i] += cnt;
                                             cardTotalLose[1][i][cnt] += 1;
+                                            cardFinalLose[i] += cnt;
                                         }
                                     }
                                     for(int i = 0; i < 13; i ++){
@@ -529,6 +536,13 @@ int main(int argc,char *argv[]){
         }
     }
     cout << "\"" << endl;
+
+    cout << "cardWinrate={"; 
+    for(int i = 0; i < 160; i ++){
+        double winRate1 = (double)(cardFinalWin[i] ) / (double)(cardFinalWin[i] + cardFinalLose[i]);
+        cout << winRate1<< ",";
+    }
+    cout << "};" << endl;
 
     cout << "totalMatch:" << totalMatches << endl;
 
