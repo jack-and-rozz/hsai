@@ -156,5 +156,5 @@
 156 ; Major Life Steal Potion ; itemBlue ; 3 ; 0 ; 0 ; ------ ; 3 ; -3 ; 0 ; Deal 3 damage to your opponent and gain 3 health. 
 157 ; Life Sap Drop ; itemBlue ; 3 ; 0 ; -1 ; ------ ; 1 ; 0 ; 1 ; Deal 1 damage, gain 1 health, and draw a card. 
 158 ; Tome of Thunder ; itemBlue ; 3 ; 0 ; -4 ; ------ ; 0 ; 0 ; 0 ; Deal 4 damage. 
-159 ; Vial of Soul Drain ;the; 4 ; 0 ; -3 ; ------ ; 3 ; 0 ; 0 ; Deal 3 damage and gain 3 health. 
+159 ; Vial of Soul Drain ;itemBlue; 4 ; 0 ; -3 ; ------ ; 3 ; 0 ; 0 ; Deal 3 damage and gain 3 health. 
 160 ; Minor Life Steal Potion ; itemBlue ; 2 ; 0 ; 0 ; ------ ; 2 ; -2 ; 0 ; Deal 2 damage to your opponent and gain 2 health. 

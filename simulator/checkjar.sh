@@ -1,5 +1,4 @@
 #!/bin/bash
-#exe_path="/Users/oda/LegendsOfCodeAndMagic/NWTraining/a.out"
 simulator_dir=simulator
 
 model_dir=$1
@@ -30,3 +29,4 @@ do
     $timeout -sKILL 20 java -jar $jar_path $exe_path2 $exe_path1 $model_dir $model_replay_path &
     wait
 done
+

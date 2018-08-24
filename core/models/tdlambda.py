@@ -28,7 +28,7 @@ class TDlambda(NStepTD):
         tf.float32, name='ph.state',
         shape=[None, NUM_TURNS, Nconfig.vocab_size.card * (config.max_num_card+1)])
       self.ph.candidates = tf.placeholder(
-        tf.int32, name='ph.next_state',
+        tf.int32, name='ph.candidates',
         shape=[None, NUM_TURNS, NUM_CANDIDATES])
 
       self.ph.next_state = tf.placeholder(
@@ -36,7 +36,7 @@ class TDlambda(NStepTD):
         shape=[None, NUM_TURNS, config.vocab_size.card * (config.max_num_card+1)])
 
       self.ph.next_candidates = tf.placeholder(
-        tf.int32, name='ph.next_state',
+        tf.int32, name='ph.next_candidates',
         shape=[None, NUM_TURNS, config.num_next_candidates_samples, NUM_CANDIDATES])
 
       self.ph.action = tf.placeholder(tf.int32, name='ph.action', shape=[None, NUM_TURNS])

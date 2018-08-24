@@ -19,7 +19,8 @@ class ExperimentManager(ManagerBase):
     #self.dataset = HSReplayDataset(self.replays_path, self.config.dataset)
     #dataset_type = getattr(core.dataset, self.config.dataset.dataset_type)
     dataset_type = getattr(core.dataset,
-                           self.config.model_type + '_HSReplayDataset')
+                           'TDlambda_HSReplayDataset')
+                           #self.config.model_type + '_HSReplayDataset')
     self.dataset = dataset_type(self.replays_path, self.config.dataset)
 
   @common.timewatch()
@@ -121,7 +122,6 @@ class ExperimentManager(ManagerBase):
       summary_dict["train/loss"] = average_loss
       summary = tf_utils.make_summary(summary_dict)
       self.summary_writer.add_summary(summary, model.epoch.eval())
-
       model.add_epoch()
     self.evaluate(model)
 

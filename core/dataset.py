@@ -78,12 +78,12 @@ class HSReplayDatasetBase(object):
     '''
     while True: # Wait until the number of replays exceeds self.memory_size
       replays = glob.glob(replay_path + '/result-*') 
-      n_replays = len(replays) * 60 # 30 * 2 picks at a game.
+      n_replays = len(replays)
       if n_replays > self.memory_size:
         break
       sys.stderr.write('No enough replays. (%d/%d)\n' % (n_replays, self.memory_size))
       time.sleep(1)
-    replays = replays[:self.memory_size // 60 + 1]
+    replays = replays[:self.memory_size]
     data = []
     for i, fpath in enumerate(replays):
       if i % (len(replays) // 10) == 0:
@@ -149,7 +149,6 @@ class NStepTD_HSReplayDataset(HSReplayDatasetBase):
     data = p1log + p2log
     return data
 
-
 class TDlambda_HSReplayDataset(HSReplayDatasetBase):
   def add_replay(self, fpath):
     log = self.read_log(fpath)
@@ -159,10 +158,10 @@ class TDlambda_HSReplayDataset(HSReplayDatasetBase):
     p1log_tensors = recDotDefaultDict()
     for d in p1log:
       batching_dicts(p1log_tensors, d)
+
     p2log_tensors = recDotDefaultDict()
-    for d in p1log:
+    for d in p2log:
       batching_dicts(p2log_tensors, d)
-      
     # Propagate rewards from the last state for N-step TD.
     # T = len(p1log)
     # for t in range(T):
@@ -170,5 +169,7 @@ class TDlambda_HSReplayDataset(HSReplayDatasetBase):
     #   p2log[t].reward = (self.td_gamma ** (T - t - 1)) * p2log[-1].reward
     data = [p1log_tensors, p2log_tensors]
     return data
+
+NStepTD_HSReplayDataset = TDlambda_HSReplayDataset
 
 

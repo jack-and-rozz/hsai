@@ -7,6 +7,7 @@ from core.utils.common import dbgprint, dotDict, recDotDefaultDict, flatten_recd
 from core.models import ModelBase
 
 NUM_CANDIDATES = 3
+NUM_TURNS = 30
 
 class NStepTD(ModelBase):
   def __init__(self, sess, config):
@@ -20,36 +21,62 @@ class NStepTD(ModelBase):
     self.vocab_size = config.vocab_size
     self.max_num_card = config.max_num_card
     self.td_gamma = config.td_gamma
-
+    self.num_step = config.num_step
+    
     self.ph = self.setup_placeholders(config)
 
     with tf.name_scope('keep_prob'):
       self.keep_prob = 1.0 - tf.to_float(self.ph.is_training) * config.dropout_rate
+    with tf.name_scope('merge_meta_features'):
+      state = tf.concat([
+        self.ph.state, self.ph.is_sente, 
+        tf.expand_dims(self.ph.current_num_cards, -1)
+      ], axis=-1)
+      next_state = tf.concat([
+        self.ph.next_state, self.ph.is_sente, 
+        tf.expand_dims(self.ph.current_num_cards + 1, -1)
+      ], axis=-1)
+      state = tf.cast(state, tf.float32)
+      next_state = tf.cast(next_state, tf.float32)
 
-    for k, v in flatten_recdict(self.ph).items():
-      print(k, v)
-    state = tf.concat([
-      self.ph.state, self.ph.is_sente, 
-      tf.expand_dims(self.ph.current_num_cards, -1)
-    ], axis=-1)
-    next_state = tf.concat([
-      self.ph.next_state, self.ph.is_sente, 
-      tf.expand_dims(self.ph.current_num_cards + 1, -1)
-    ], axis=-1)
-    state = tf.cast(state, tf.float32)
-    next_state = tf.cast(next_state, tf.float32)
+    with tf.name_scope('get_q_values'):
+      state = tf.unstack(state, axis=1)
+      next_state = tf.unstack(next_state, axis=1)
+      action = tf.unstack(self.ph.action, axis=1)
+      next_candidates = tf.unstack(self.ph.next_candidates, axis=1)
+      reward = tf.unstack(self.ph.reward, axis=1)
+      is_end_state = tf.unstack(self.ph.is_end_state, axis=1)
 
-    self.q_values, self.q_values_of_selected_action, self.target = self.inference(
-      state, self.ph.action, next_state, 
-      self.ph.next_candidates, self.ph.reward, self.ph.is_end_state)
+      q_values = []
+      q_values_of_selected_action = []
+      expected_next_q_values = []
+      for s, a, ns, nc in zip(state, action, next_state, next_candidates):
+        qv, qvsa, next_qv = self.get_q_values(s, a, ns, nc)
+        q_values.append(qv)
+        q_values_of_selected_action.append(qvsa)
+        expected_next_q_values.append(next_qv)
+
+      self.q_values = q_values 
+      self.loss = self.calc_n_step_loss(is_end_state, reward, 
+                                        expected_next_q_values, 
+                                        q_values_of_selected_action,
+                                        self.num_step)
+      self.updates = self.get_updates(self.loss, self.global_step)
+
+  def calc_n_step_loss(self, is_end_state, reward, expected_next_q_values,
+                       q_values_of_selected_action, N):
+    with tf.name_scope('get_target_values'):
+      targets = self.get_target_values(expected_next_q_values, is_end_state, 
+                                       reward, N)
     with tf.name_scope('loss'):
-      self.loss = self._clipped_loss(self.target, 
-                                     self.q_values_of_selected_action)
-      #self.loss = self._loss(self.target, self.q_values_of_selected_action)
-    self.updates = self.get_updates(self.loss, self.global_step)
+      losses = []
+      for i in range(NUM_TURNS):
+        loss = self._clipped_loss(targets[i], q_values_of_selected_action[i])
+        losses.append(loss)
+      loss = tf.reduce_mean(losses)
+    return loss
 
-  def inference(self, state, action, next_state, next_candidates, 
-                reward, is_end_state):
+  def get_q_values(self, state, action, next_state, next_candidates):
     q_values = self.calc_q_values(state) # [batch_size, vocab_size] 
 
     # The Q values only of the action chosen in the current step.
@@ -79,16 +106,34 @@ class NStepTD(ModelBase):
         expected_next_q_value = tf.reduce_mean(
           tf.reduce_max(masked_next_q_values, axis=-1), axis=-1)
 
-    # Target is the sum of and the intermediate reward and the next Q values discounted by gamma if the next state is not an end state. 
+    return q_values, q_values_of_selected_action, expected_next_q_value
+
+  def get_target_values(self, expected_next_q_value, is_end_state, reward, N):
+    '''
+    Args:
+    expected_next_q_value, is_end_state, reward: Lists of tensors.
+    '''
+    # Target is the sum of and the intermediate reward and the next Q values discounted by gamma if the next state is not an end state.
+    i = 0
+
     with tf.name_scope('target_value'):
       # The next expected Q-value is ignored if this step is end state.
-      is_end_state_mask = tf.cast(tf.logical_not(is_end_state), tf.float32) # [batch_size]
+      targets = []
+      for i in range(NUM_TURNS):
+        # N step先読みした後のtime step, 0~29 stepまで
 
-      # N-step TD (N->inf) の状況では r <- Q(s,t) でok
-      #target = self.ph.reward + self.td_gamma * is_end_state_mask * self.expected_next_q_value # r + gamma * max(Q(s[t+1], a[t+1])) if t+1 != T else r
-      target = reward
-      target = tf.stop_gradient(target)
-    return q_values, q_values_of_selected_action, target
+        last_step = min(i + N, NUM_TURNS - 1)
+        n = last_step - i  # 実際に何ステップ読んだか 
+        is_end_state_mask = tf.cast(tf.logical_not(is_end_state[last_step]), 
+                                    tf.float32) # [batch_size]
+
+        target = [r * (self.td_gamma ** j) for j, r in enumerate(reward[i:last_step+1])]
+        target = tf.reduce_sum(target, axis=0)
+        # sum[t:t+N] {r_{t+i} * (gamma ** i)} +(gamma ** (i+1)) * max(Q(s[t+i], a[t+i]))
+        target += (self.td_gamma ** n) * is_end_state_mask * expected_next_q_value[last_step]
+        target = tf.stop_gradient(target)
+        targets.append(target)
+    return targets
 
 
   def _clipped_loss(self, target, filtered_qs):
@@ -140,38 +185,37 @@ class NStepTD(ModelBase):
       ph.is_training = tf.placeholder(tf.bool, name='is_training', shape=[])
       ph.state = tf.placeholder(
         tf.int32, name='ph.state',
-        shape=[None, config.vocab_size.card * (config.max_num_card+1)])
+        shape=[None, NUM_TURNS, config.vocab_size.card * (config.max_num_card+1)])
+
       ph.candidates = tf.placeholder(
         tf.int32, name='ph.next_state',
-        shape=[None, NUM_CANDIDATES])
+        shape=[None, NUM_TURNS, NUM_CANDIDATES])
 
       ph.next_state = tf.placeholder(
         tf.int32, name='ph.next_state',
-        shape=[None, config.vocab_size.card * (config.max_num_card+1)])
+        shape=[None, NUM_TURNS, config.vocab_size.card * (config.max_num_card+1)])
 
       ph.next_candidates = tf.placeholder(
         tf.int32, name='ph.next_state',
-        shape=[None, config.num_next_candidates_samples, NUM_CANDIDATES])
+        shape=[None, NUM_TURNS, config.num_next_candidates_samples, NUM_CANDIDATES])
 
-      ph.action = tf.placeholder(tf.int32, name='ph.action', shape=[None])
-      ph.reward = tf.placeholder(tf.float32, name='ph.reward', shape=[None])
+      ph.action = tf.placeholder(tf.int32, name='ph.action', shape=[None, NUM_TURNS])
+      ph.reward = tf.placeholder(tf.float32, name='ph.reward', shape=[None, NUM_TURNS])
       ph.is_end_state = tf.placeholder(
-        tf.bool, name='ph.is_end_state', shape=[None])
+        tf.bool, name='ph.is_end_state', shape=[None, NUM_TURNS])
       ph.is_sente = tf.placeholder(
-        tf.int32, name='ph.is_sente', shape=[None, 2])
+        tf.int32, name='ph.is_sente', shape=[None, NUM_TURNS, 2])
       ph.current_num_cards = tf.placeholder(
-        tf.int32, name='ph.current_num_cards', shape=[None])
+        tf.int32, name='ph.current_num_cards', shape=[None, NUM_TURNS])
     return ph
 
-  
   def step(self, batch, step):
     input_feed = self.get_input_feed(batch)
 
     #self.debug_ops = [self.q_values_of_selected_action,  self.masked_next_q_values, self.expected_next_q_value, self.target, self.ph.reward]
     self.debug_ops = [
-      self.q_values_of_selected_action,  
-      self.target,
-      self.loss
+      self.loss,
+      self.q_values
       #self.masked_next_q_values, 
       #self.expected_next_q_value, 
       #self.target, self.ph.reward,
