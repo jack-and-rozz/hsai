@@ -150,16 +150,22 @@ def get_figure(remove_ticks=False):
 
 def visualize(p1stat, p2stat, output_dir):
   card_props = list(p1stat.keys()) #['card_id', 'cost', 'ctype']
-  alpha = 0.3
+  alpha = 0.5
+  #histtype = 'stepfilled'#'stepfilled' #{'bar', 'barstacked', 'step', 'stepfilled'},
   histtype = 'stepfilled'#'stepfilled' #{'bar', 'barstacked', 'step', 'stepfilled'},
+  def reshape(key):
+    if type(key) == str:
+      return key
+    key = '%03d' % int(key)
+    return key
 
   for i, prop in enumerate(card_props):
     fig, main_ax = get_figure()
   
     p1data = sorted([(k, v) for k, v in p1stat[prop].items()], key=lambda x: x[0])
     p2data = sorted([(k, v) for k, v in p2stat[prop].items()], key=lambda x: x[0])
-    data = [flatten([[k for _ in range(v)] for k, v in p1data]),
-            flatten([[k for _ in range(v)] for k, v in p2data])]
+    data = [flatten([[reshape(k) for _ in range(v)] for k, v in p1data]),
+            flatten([[reshape(k) for _ in range(v)] for k, v in p2data])]
     xlower = min(set(flatten(data)))
     xupper = max(set(flatten(data)))
     all_keys = set(flatten(data))
@@ -201,6 +207,8 @@ def main(args):
     if not os.path.exists(output_dir):
       os.makedirs(output_dir)
 
+  print(p1hist.cost)
+  print(p2hist.cost)
   visualize(p1hist, p2hist, output_dir)
 
 
